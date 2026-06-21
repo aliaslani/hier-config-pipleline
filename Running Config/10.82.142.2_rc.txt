@@ -1,0 +1,799 @@
+Building configuration...
+
+Current configuration : 21219 bytes
+!
+! Last configuration change at 18:08:51 IRST Sat Oct 19 2024 by ansible
+! NVRAM config last updated at 18:08:51 IRST Sat Oct 19 2024 by ansible
+!
+version 15.2
+no service pad
+service timestamps debug datetime localtime show-timezone
+service timestamps log datetime localtime show-timezone
+service password-encryption
+service sequence-numbers
+!
+hostname AZE-WbSW1506148-SW
+!
+boot-start-marker
+boot-end-marker
+!
+logging count
+enable secret 5 $1$gLbZ$zddWzh9aXnUid2QwuAGh30
+!
+username admin=swwan secret 5 $1$9GLs$pInuOUWLnj8iFNCvFgv.J1
+username spbnk privilege 15 secret 5 $1$pID3$58tlhF2eU51zIj54NbnOF/
+aaa new-model
+!
+!
+aaa group server tacacs+ ISE_TACACS
+ server name ISE-3
+ server name ISE-4
+ ip tacacs source-interface FastEthernet0/0
+!
+aaa authentication login default group ISE_TACACS local
+aaa authentication enable default group ISE_TACACS enable
+aaa authorization console
+aaa authorization config-commands
+aaa authorization exec default group ISE_TACACS local 
+aaa authorization commands 1 default group ISE_TACACS local 
+aaa authorization commands 15 default group ISE_TACACS local 
+aaa accounting exec default start-stop group ISE_TACACS
+aaa accounting commands 1 default start-stop group ISE_TACACS
+aaa accounting commands 15 default start-stop group ISE_TACACS
+!
+!
+!
+!
+!
+!
+aaa session-id common
+clock timezone IRST 3 30
+clock summer-time Tehran recurring 3 Tue Mar 23:59 3 Wed Sep 23:59
+!
+!
+no ip domain-lookup
+ip domain-name Sepah.local
+login block-for 60 attempts 5 within 10
+login on-failure log
+login on-success log
+vtp domain swwan=vtp
+vtp mode transparent
+!
+!
+!
+!
+!
+!
+!
+crypto pki trustpoint TP-self-signed-2726760448
+ enrollment selfsigned
+ subject-name cn=IOS-Self-Signed-Certificate-2726760448
+ revocation-check none
+ rsakeypair TP-self-signed-2726760448
+!
+!
+crypto pki certificate chain TP-self-signed-2726760448
+ certificate self-signed 01
+  3082022B 30820194 A0030201 02020101 300D0609 2A864886 F70D0101 05050030 
+  31312F30 2D060355 04031326 494F532D 53656C66 2D536967 6E65642D 43657274 
+  69666963 6174652D 32373236 37363034 3438301E 170D3036 30313032 30303030 
+  35365A17 0D323030 31303130 30303030 305A3031 312F302D 06035504 03132649 
+  4F532D53 656C662D 5369676E 65642D43 65727469 66696361 74652D32 37323637 
+  36303434 3830819F 300D0609 2A864886 F70D0101 01050003 818D0030 81890281 
+  81008998 2D0F4039 4E74EFDB 8D50C5BF 5B7D7739 1B9952A3 EB85A845 2CA80DCF 
+  E409D9C3 73D77AE1 5A2D598E B1FBD691 066894CC C14DFCAD 7DFA4AC0 B7EE5B25 
+  05356BD7 35656911 63586183 4C5F97CD 43D2E889 CA781482 E33BDA62 F2EF948C 
+  68B3C532 BEAA00E6 821862B9 A1113679 1380410C 62432160 4960B7B0 87610D17 
+  43A30203 010001A3 53305130 0F060355 1D130101 FF040530 030101FF 301F0603 
+  551D2304 18301680 146E418E DF5E2B78 8A7A8138 011F0C0A 5F962735 F2301D06 
+  03551D0E 04160414 6E418EDF 5E2B788A 7A813801 1F0C0A5F 962735F2 300D0609 
+  2A864886 F70D0101 05050003 81810037 6BBEF5BB 3705F0B5 23DAE7C0 AD06013E 
+  D5A77335 780A5D32 125783CE 92403DA6 33B5BFF0 8AA5E37D B8675890 AB5C5C20 
+  C224E1AA 1777A163 FF3F2DAB 1F705452 1ECBA097 E51349B5 2609D23B E2EAE3CB 
+  AF34930E DED4BDAF 1A390622 C9A6DCFA 13519FA6 56F75E39 1427E794 359D5E53 
+  F8F00971 AB97A616 89A840D4 C4E54D
+  	quit
+spanning-tree mode pvst
+spanning-tree extend system-id
+errdisable recovery interval 30
+!
+!
+!
+!
+vlan internal allocation policy ascending
+!
+vlan 2
+ name Device
+!
+vlan 3
+ name ATM
+!
+vlan 4
+ name Camera
+!
+vlan 5
+ name Client
+!
+vlan 6
+ name reserved
+!
+vlan 7
+ name management
+!
+vlan 10
+ name ADSL
+!
+vlan 30
+ name Mobinnet
+!
+vlan 40 
+!
+!
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+interface FastEthernet0
+ description Shutdown
+ no ip address
+ shutdown
+!
+interface GigabitEthernet0/1
+ description reies
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/2
+ description moaven
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/3
+ description clinet-anicard
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/4
+ description anicard-device
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/5
+ description client
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/6
+ description client
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/7
+ description client
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/8
+ description client
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/9
+ description client
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/10
+ description client
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/11
+ description client
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/12
+ description client
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/13
+ description client
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/14
+ description client
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/15
+ description client
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/16
+ description client
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/17
+ description client
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/18
+ description client
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/19
+ description client
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/20
+ description client
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/21
+ description client
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/22
+ description client
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/23
+ description client
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/24
+ description client
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/25
+ description client
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/26
+ description client
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/27
+ description client
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/28
+ description client
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/29
+ description client
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/30
+ description client
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/31
+ description client
+ switchport access vlan 5
+ switchport mode access
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/32
+ description client
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/33
+ description client
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/34
+ description client
+ switchport access vlan 5
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/35
+ description ATM1
+ switchport access vlan 3
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/36
+ description ATM2
+ switchport access vlan 3
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security mac-address sticky
+ switchport port-security mac-address sticky 0018.7d15.eab0
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/37
+ description ATM3
+ switchport access vlan 3
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security mac-address sticky
+ switchport port-security mac-address sticky 0018.7d37.90cf
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/38
+ description Saatzani
+ switchport access vlan 2
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security mac-address sticky
+ switchport port-security mac-address sticky 0017.fc1a.a859
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/39
+ description Nobatdehi
+ switchport access vlan 2
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security mac-address sticky
+ switchport port-security mac-address sticky 0024.01a3.3f77
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/40
+ description Pinpad
+ switchport access vlan 2
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security mac-address sticky
+ switchport port-security mac-address sticky 001d.a920.fd25
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/41
+ description UPS
+ switchport access vlan 2
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security mac-address sticky
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/42
+ description printer1
+ switchport access vlan 2
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security mac-address sticky
+ switchport port-security mac-address sticky 00e4.4f68.1778
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/43
+ description printer2
+ switchport access vlan 2
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security mac-address sticky
+ switchport port-security mac-address sticky d849.2fe9.be25
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/44
+ description DC Server
+ switchport access vlan 7
+ switchport mode access
+ switchport port-security violation  restrict
+ switchport port-security mac-address sticky
+ switchport port-security mac-address sticky 1cc1.defa.fd5c
+ switchport port-security
+ no cdp enable
+ spanning-tree portfast
+ spanning-tree bpdufilter enable
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/45
+ description Uplink-To-ADSL
+ switchport access vlan 10
+ switchport mode access
+ switchport port-security mac-address sticky
+ spanning-tree portfast
+!
+interface GigabitEthernet0/46
+ description Uplink-To-Wimax
+ switchport access vlan 30
+ switchport mode access
+ switchport port-security mac-address sticky
+ spanning-tree portfast
+!
+interface GigabitEthernet0/47
+ description Uplink-To-Router
+ switchport trunk allowed vlan 10,30,40
+ switchport mode trunk
+ switchport port-security mac-address sticky
+!
+interface GigabitEthernet0/48
+ description Uplink-To-Router
+ switchport trunk allowed vlan 2-7
+ switchport mode trunk
+!
+interface GigabitEthernet0/49
+ description FiberOptic
+ switchport access vlan 40
+ switchport mode access
+!
+interface GigabitEthernet0/50
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+interface Vlan2
+ ip address 10.16.16.24 255.255.255.0
+!
+interface Vlan7
+ ip address 10.82.142.2 255.255.255.240
+!
+ip default-gateway 10.82.142.1
+no ip http server
+no ip http secure-server
+!
+ip ssh time-out 30
+ip ssh version 2
+!
+ip access-list standard SNMP
+ permit 10.100.4.67
+ permit 10.100.4.93
+!
+logging trap debugging
+logging origin-id hostname
+logging source-interface Vlan2
+snmp-server group Sbank v3 auth 
+snmp-server group Sbank v3 priv read Monitoring access SNMP
+snmp-server view Monitoring iso included
+snmp-server host 10.100.4.67 version 3 auth Sphmon 
+snmp-server host 10.100.4.93 version 3 auth Sphmon 
+tacacs-server timeout 1
+tacacs-server directed-request
+tacacs server ISE-3
+ address ipv4 10.100.4.90
+ key 7 091F5E2911481B4E0E15
+tacacs server ISE-4
+ address ipv4 10.180.12.12
+ key 7 115A09251F5F07500133
+!
+!
+banner login ^CC
+
+##########################################################################
+#                                                                        #
+#       ____  _____ ____   _    _   _    ____    _    _   _ _  __        #
+#      / ___|| ____|  _ \ / \  | | | |  | __ )  / \  | \ | | |/ /        #
+#      \___ \|  _| | |_) / _ \ | |_| |  |  _ \ / _ \ |  \| | ' /         #
+#       ___) | |___|  __/ ___ \|  _  |  | |_) / ___ \| |\  | . \         #
+#      |____/|_____|_| /_/   \_\_| |_|  |____/_/   \_\_| \_|_|\_\        #
+#                                                                        #
+#                                                                        #
+#      -----------------------------------------------------------       #
+#                  UNAUTHORIZED ACCESS IS PROHIBITED                     #
+#      -----------------------------------------------------------       #
+#                                                                        #
+#                                                                        #
+#   You must have explicit authorized permission to access this device   #
+#    All activities performed on this device are logged and monitored    #
+#                                                                        #
+#                                                                        #
+##########################################################################
+^C
+!
+line con 0
+ session-timeout 10 
+ exec-timeout 5 0
+ logging synchronous
+line vty 0 4
+ session-timeout 15 
+ logging synchronous
+ transport input ssh
+line vty 5 15
+ session-timeout 15 
+ logging synchronous
+ transport input ssh
+!
+ntp server 10.4.12.10
+ntp server 172.16.212.90
+ntp server 10.4.12.12 prefer
+end

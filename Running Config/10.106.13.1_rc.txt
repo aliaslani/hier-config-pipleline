@@ -1,0 +1,371 @@
+Building configuration...
+
+Current configuration : 9963 bytes
+!
+! Last configuration change at 13:08:22 IRST Mon Oct 7 2024 by ansible
+! NVRAM config last updated at 13:08:22 IRST Mon Oct 7 2024 by ansible
+!
+version 15.4
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+!
+hostname YZD-Wbr1500524-R
+!
+boot-start-marker
+boot-end-marker
+!
+!
+enable secret 5 $1$5xGo$YRII6y7bYIunhuBZ8G/zB.
+!
+aaa new-model
+!
+!
+aaa group server tacacs+ ISE_TACACS
+ server 10.100.4.90
+ server 10.180.12.12
+ server name ISE-3
+ server name ISE-4
+ ip tacacs source-interface GigabitEthernet0/0.2
+!
+aaa authentication login default group ISE_TACACS local
+aaa authentication enable default group ISE_TACACS enable
+aaa authorization console
+aaa authorization config-commands
+aaa authorization exec default group ISE_TACACS local 
+aaa authorization commands 0 default group ISE_TACACS local 
+aaa authorization commands 1 default group ISE_TACACS local 
+aaa authorization commands 15 default group ISE_TACACS local 
+aaa accounting exec default start-stop group ISE_TACACS
+aaa accounting commands 1 default start-stop group ISE_TACACS
+aaa accounting commands 15 default start-stop group ISE_TACACS
+!
+!
+!
+!
+!
+aaa session-id common
+clock timezone IRST 3 30
+clock summer-time IRDT date Mar 22 2023 0:00 Sep 22 2023 0:00
+!
+!
+!
+!
+ip dhcp excluded-address 10.106.13.125 10.106.13.126
+ip dhcp excluded-address 10.106.13.123 10.106.13.124
+!
+ip dhcp pool vlan4
+ network 10.106.13.64 255.255.255.192
+ default-router 10.106.13.65 
+ dns-server 172.16.208.1 172.16.208.5 
+ lease 12
+!
+!
+!
+no ip domain lookup
+ip domain name Sepah.local
+ip cef
+no ipv6 cef
+!
+multilink bundle-name authenticated
+!
+!
+!
+key chain SEPAH-EIGRP-UNDERLAY
+ key 1
+  key-string 7 015755147B2347
+!
+!
+license udi pid CISCO2901/K9 sn FCZ1841C0JB
+!
+!
+username spbnk privilege 15 secret 5 $1$44an$I4pJLLgis/XrZ9aNxL5AQ0
+!
+redundancy
+!
+!
+!
+!
+!
+ip ssh version 2
+! 
+!
+crypto isakmp policy 110
+ encr aes 192
+ authentication pre-share
+ group 5
+crypto isakmp key 3p@h!p$3c# address 10.191.0.2     
+crypto isakmp key 3p@h!p$3c# address 10.191.0.12    
+crypto isakmp key 3p@h!p$3c# address 10.161.65.13   
+crypto isakmp key 3p@h!p$3c# address 10.161.65.14   
+!
+!
+crypto ipsec transform-set SEP-TR-IPSEC esp-aes 192 esp-sha-hmac 
+ mode tunnel
+!
+crypto ipsec profile SEP-PR-IPSEC
+ set transform-set SEP-TR-IPSEC 
+!
+!
+!
+!
+!
+!
+!
+interface Loopback10
+ description [Routing-EIGRP-TDM]
+ ip address 10.106.13.254 255.255.255.255
+!
+interface Tunnel4
+ description [Tellabs-Norenta]
+ ip address 192.168.6.22 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.6.58
+ tunnel destination 10.51.6.2
+!
+interface Tunnel5
+ description [LTE]
+ ip address 192.168.30.54 255.255.255.252
+ ip mtu 1460
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.191.19.110
+ tunnel destination 10.191.0.2
+!
+interface Tunnel9010
+ description [DMVPN-FOR-TDM]
+ bandwidth 2048
+ ip address 192.168.228.124 255.255.224.0
+ no ip redirects
+ ip mtu 1400
+ ip nhrp authentication $3p@H!
+ ip nhrp map 192.168.224.1 10.161.65.13
+ ip nhrp map multicast 10.161.65.13
+ ip nhrp map 192.168.224.3 10.181.1.253
+ ip nhrp map multicast 10.181.1.253
+ ip nhrp network-id 101
+ ip nhrp nhs 192.168.224.1
+ ip nhrp nhs 192.168.224.3
+ ip tcp adjust-mss 1360
+ tunnel source Loopback10
+ tunnel mode gre multipoint
+ tunnel key 101
+!
+interface Tunnel9030
+ description [DMVPN-FOR-TDLTE-MOBINNET]
+ bandwidth 2048
+ ip address 192.168.164.124 255.255.224.0
+ no ip redirects
+ ip mtu 1400
+ ip nhrp authentication $3p@H!
+ ip nhrp map 192.168.160.1 10.191.0.2
+ ip nhrp map multicast 10.191.0.2
+ ip nhrp map 192.168.160.3 10.191.0.12
+ ip nhrp map multicast 10.191.0.12
+ ip nhrp network-id 303
+ ip nhrp nhs 192.168.160.1
+ ip nhrp nhs 192.168.160.3
+ ip tcp adjust-mss 1360
+ tunnel source 10.191.19.110
+ tunnel mode gre multipoint
+ tunnel key 303
+!
+interface Embedded-Service-Engine0/0
+ no ip address
+ shutdown
+!
+interface GigabitEthernet0/0
+ no ip address
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/0.2
+ description [Net-Device]
+ encapsulation dot1Q 2
+ ip address 10.106.13.1 255.255.255.224
+!
+interface GigabitEthernet0/0.3
+ description [Windows-Service]
+ encapsulation dot1Q 3
+ ip address 10.106.13.33 255.255.255.224
+!
+interface GigabitEthernet0/0.4
+ description [Core-Bank]
+ encapsulation dot1Q 4
+ ip address 10.106.13.65 255.255.255.192
+!
+interface GigabitEthernet0/0.5
+ description [ATM]
+ encapsulation dot1Q 5
+ ip address 10.106.13.129 255.255.255.240
+!
+interface GigabitEthernet0/0.7
+ description [Conect-To-1508084]
+ encapsulation dot1Q 7
+ ip address 172.16.79.1 255.255.255.252
+!
+interface GigabitEthernet0/0.9
+ description [Fibre]
+ encapsulation dot1Q 9
+ ip address 10.51.6.58 255.255.255.252
+!
+interface GigabitEthernet0/1
+ description [LTE]
+ ip address 10.191.19.110 255.255.255.252
+ duplex auto
+ speed auto
+!
+interface Serial0/0/0
+ description [Tellabs]
+ no ip address
+ encapsulation ppp
+ shutdown
+ keepalive 5 4
+ clock rate 2000000
+!
+!
+router eigrp SEPAH-SOUTH
+ !
+ address-family ipv4 unicast autonomous-system 502
+  !
+  af-interface Tunnel4
+   authentication mode md5
+   authentication key-chain SEPAH-EIGRP-UNDERLAY
+  exit-af-interface
+  !
+  topology base
+  exit-af-topology
+  network 10.106.13.0 0.0.0.255
+  network 192.168.6.20 0.0.0.3
+  eigrp stub connected
+ exit-address-family
+!
+router rip
+ version 2
+ network 10.0.0.0
+ neighbor 172.16.6.1
+ no auto-summary
+!
+router bgp 65510
+ bgp log-neighbor-changes
+ neighbor 192.168.160.1 remote-as 65500
+ neighbor 192.168.160.1 update-source Tunnel9030
+ neighbor 192.168.160.3 remote-as 65500
+ neighbor 192.168.160.3 update-source Tunnel9030
+ neighbor 192.168.224.1 remote-as 65500
+ neighbor 192.168.224.1 update-source Tunnel9010
+ neighbor 192.168.224.3 remote-as 65500
+ neighbor 192.168.224.3 update-source Tunnel9010
+ !
+ address-family ipv4
+  network 10.106.13.0 mask 255.255.255.0
+  network 172.16.6.0 mask 255.255.255.0 backdoor
+  neighbor 192.168.160.1 activate
+  neighbor 192.168.160.3 activate
+  neighbor 192.168.224.1 activate
+  neighbor 192.168.224.3 activate
+ exit-address-family
+!
+ip forward-protocol nd
+!
+no ip http server
+no ip http secure-server
+!
+ip route 10.51.6.0 255.255.255.0 10.51.6.57 name [Tellabs-Norenta]
+ip route 10.106.13.0 255.255.255.0 Null0
+ip route 10.106.192.0 255.255.255.0 172.16.79.2
+ip route 10.191.0.0 255.255.0.0 10.191.19.109 name [LTE]
+ip route 172.16.79.0 255.255.255.252 172.16.79.2 name [Conect-To-1508084]
+ip tacacs source-interface GigabitEthernet0/0.2
+!
+ip access-list standard SNMP
+ permit 10.100.4.67
+ permit 10.100.4.87
+!
+!
+!
+snmp-server group Sbank v3 auth 
+snmp-server group Sbank v3 priv read Monitoring access SNMP
+snmp-server view Monitoring iso included
+snmp-server community ictmonitor RO
+snmp-server community pilotd@n@ RO
+snmp-server host 10.100.4.67 version 3 auth Sphmon 
+snmp-server host 10.100.4.67 version 3 auth admin 
+snmp-server host 10.100.4.87 version 3 auth admin 
+snmp-server host 172.16.213.17 version 2c branch6 
+snmp-server host 10.100.4.84 ictmonitor 
+snmp-server host 10.100.4.91 version 2c ictmonitor 
+snmp-server host 10.100.9.34 version 2c pilotd@n@ 
+snmp-server host 10.100.9.37 version 2c pilotd@n@ 
+snmp-server host 10.100.9.40 version 2c pilotd@n@ 
+tacacs-server host 10.100.4.90 key 7 005703260C16075A0A38
+tacacs-server host 10.180.12.12 key 7 03574B2B0E422D104B10
+tacacs-server timeout 1
+tacacs-server directed-request
+tacacs server ISE-3
+ key 7 04081B26076C40120C00
+tacacs server ISE-4
+ key 7 13560732034108762E3D
+access-list 125 deny   tcp 10.106.13.0 0.0.0.255 host 10.100.8.40 log
+access-list 125 deny   tcp 10.106.13.0 0.0.0.255 host 10.100.8.41 log
+access-list 125 deny   tcp 10.106.13.0 0.0.0.255 host 10.100.8.42 log
+access-list 125 deny   tcp 10.106.13.0 0.0.0.255 host 172.16.212.97 log
+access-list 125 deny   tcp 10.106.13.0 0.0.0.255 host 10.100.9.34 log
+access-list 125 deny   tcp any host 10.106.13.37 log
+access-list 125 deny   tcp host 10.106.13.37 any log
+access-list 125 permit eigrp any any
+access-list 125 permit gre any any
+access-list 125 permit tcp any any
+access-list 125 permit icmp any any
+access-list 125 permit udp any any
+!
+!
+!
+control-plane
+!
+!
+banner login ^C
+##########################################################################
+#                                                                        #
+#       ____  _____ ____   _    _   _    ____    _    _   _ _  __        #
+#      / ___|| ____|  _ \ / \  | | | |  | __ )  / \  | \ | | |/ /        #
+#      \___ \|  _| | |_) / _ \ | |_| |  |  _ \ / _ \ |  \| | ' /         #
+#       ___) | |___|  __/ ___ \|  _  |  | |_) / ___ \| |\  | . \         #
+#      |____/|_____|_| /_/   \_\_| |_|  |____/_/   \_\_| \_|_|\_\        #
+#                                                                        #
+#                                                                        #
+#      -----------------------------------------------------------       #
+#                  UNAUTHORIZED ACCESS IS PROHIBITED                     #
+#      -----------------------------------------------------------       #
+#                                                                        #
+#                                                                        #
+#   You must have explicit authorized permission to access this device   #
+#    All activities performed on this device are logged and monitored    #
+#                                                                        #
+#                                                                        #
+##########################################################################
+^C
+!
+line con 0
+ transport preferred none
+line aux 0
+line 2
+ no activation-character
+ no exec
+ transport preferred none
+ transport output pad telnet rlogin lapb-ta mop udptn v120 ssh
+ stopbits 1
+line vty 0 4
+ session-timeout 15 
+ authorization commands 0 tacacs
+ transport input ssh
+line vty 5 15
+ session-timeout 15 
+ authorization commands 0 tacacs
+ transport input ssh
+!
+scheduler allocate 20000 1000
+ntp server 172.16.212.90
+!
+end

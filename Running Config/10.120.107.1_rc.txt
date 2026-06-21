@@ -1,0 +1,477 @@
+Building configuration...
+
+Current configuration : 12441 bytes
+!
+! No configuration change since last restart
+version 15.1
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+!
+hostname KSH-Wbr1505549-R
+!
+boot-start-marker
+boot-end-marker
+!
+!
+enable secret 4 dIZRPSgViaCFyqbhiWULs03rqmDdNsRz9AnbUNzvsSU
+!
+aaa new-model
+!
+!
+aaa group server tacacs+ ISE_TACACS
+ server name ISE-3
+ server name ISE-4
+ ip tacacs source-interface GigabitEthernet0/0.4
+!
+aaa authentication login default group ISE_TACACS local
+aaa authentication enable default group ISE_TACACS enable
+aaa authorization console
+aaa authorization config-commands
+aaa authorization exec default group ISE_TACACS local 
+aaa authorization commands 1 default group ISE_TACACS local 
+aaa authorization commands 15 default group ISE_TACACS local 
+aaa accounting exec default start-stop group ISE_TACACS
+aaa accounting commands 1 default start-stop group ISE_TACACS
+aaa accounting commands 15 default start-stop group ISE_TACACS
+aaa accounting system default start-stop group ISE_TACACS
+!
+!
+!
+!
+!
+aaa session-id common
+!
+clock timezone IRST 3 30
+clock summer-time IRDT date Mar 22 2023 0:00 Sep 22 2023 0:00
+!
+no ipv6 cef
+no ip source-route
+ip cef
+!
+!
+!
+ip vrf sepah
+!
+!
+!
+no ip domain lookup
+ip domain name Sepah.local
+!
+multilink bundle-name authenticated
+!
+!
+chat-script DIALOUT ABORT ERROR ABORT BUSY "" "AT" OK "ATDT \T" TIMEOUT 120 CONE
+!
+key chain SEPAH-EIGRP-UNDERLAY
+ key 1
+  key-string 7 0040401624734A
+modemcap entry MY_USR_MODEM:MSC=&F0X2L1M0S0=1
+modemcap entry MYMODEM:MSC=&F1S0=1
+modemcap entry accorp:FD=&F:AA=S0=1:CD=&C1:SPD=&Q6:DTE=115200
+crypto pki token default removal timeout 0
+!
+!
+license udi pid CISCO2901/K9 sn FGL163121J3
+license boot module c2900 technology-package securityk9
+!
+!
+archive
+ path ftp://cfg:cfg@10.35.1.22/$h
+ write-memory
+username mebank secret 5 $1$kfQG$XwgoF06Z7i0r2Jd/oFl1e0
+username spbnk privilege 15 secret 4 m82SIGEbP25jWIMe.Amn8oRXJO7Eg1AHcCaqZjVEYns
+!
+redundancy
+!
+!
+!
+!
+ip ssh version 2
+! 
+!
+crypto isakmp policy 110
+ encr aes 192
+ authentication pre-share
+ group 5
+crypto isakmp key 3p@h!p$3c# address 10.191.0.2
+crypto isakmp key 3p@h!p$3c# address 10.191.0.12
+crypto isakmp key 3p@h!p$3c# address 10.161.65.13
+crypto isakmp key 3p@h!p$3c# address 10.161.65.14
+!
+!
+crypto ipsec transform-set SEP-TR-IPSEC esp-aes 192 esp-sha-hmac 
+!
+crypto ipsec profile SEP-PR-IPSEC
+ set transform-set SEP-TR-IPSEC 
+!
+!
+!
+!
+!
+interface Loopback1
+ no ip address
+!
+interface Loopback10
+ description [Routing-EIGRP-TDM]
+ ip address 10.120.107.14 255.255.255.255
+!
+interface Loopback30
+ description [MGMT]
+ no ip address
+!
+interface Tunnel8
+ description ### MOBINNET-TEHRAN ###
+ bandwidth 2048
+ ip address 10.251.181.6 255.255.255.252
+ ip mtu 1460
+ ip tcp adjust-mss 1416
+ delay 1
+ keepalive 10 3
+ tunnel source 10.191.109.26
+ tunnel destination 10.35.210.1
+!
+interface Tunnel10
+ description ### NORONTA/SEPAH ###
+ bandwidth 2048
+ ip address 192.168.200.2 255.255.255.252
+ ip mtu 1460
+ ip authentication mode eigrp 504 md5
+ ip authentication key-chain eigrp 504 SEPAH-EIGRP-UNDERLAY
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.200.2
+ tunnel destination 10.51.20.2
+!
+interface Tunnel15
+ description MOBIN_NET
+ ip address 192.168.142.62 255.255.255.252
+ keepalive 5 4
+ tunnel source 10.191.109.26
+ tunnel destination 10.191.0.2
+!
+interface Tunnel9010
+ description [DMVPN-FOR-TDM]
+ bandwidth 2048
+ ip address 192.168.241.124 255.255.224.0
+ no ip redirects
+ ip mtu 1400
+ ip nhrp authentication $3p@H!
+ ip nhrp map 192.168.224.1 10.161.65.13
+ ip nhrp map multicast 10.161.65.13
+ ip nhrp map 192.168.224.3 10.181.1.253
+ ip nhrp map multicast 10.181.1.253
+ ip nhrp network-id 101
+ ip nhrp nhs 192.168.224.1
+ ip nhrp nhs 192.168.224.3
+ ip tcp adjust-mss 1360
+ tunnel source Loopback10
+ tunnel mode gre multipoint
+ tunnel key 101
+!
+interface Tunnel9030
+ description [DMVPN-FOR-TDLTE]
+ bandwidth 2048
+ ip address 192.168.177.124 255.255.224.0
+ no ip redirects
+ ip mtu 1400
+ ip nhrp authentication $3p@H!
+ ip nhrp map multicast 10.191.0.12
+ ip nhrp map 192.168.160.3 10.191.0.12
+ ip nhrp map multicast 10.191.0.2
+ ip nhrp map 192.168.160.1 10.191.0.2
+ ip nhrp network-id 303
+ ip nhrp nhs 192.168.160.1
+ ip nhrp nhs 192.168.160.3
+ ip tcp adjust-mss 1360
+ tunnel source 10.191.109.26
+ tunnel mode gre multipoint
+ tunnel key 303
+!
+interface Embedded-Service-Engine0/0
+ no ip address
+ shutdown
+!
+interface GigabitEthernet0/0
+ no ip address
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/0.1
+ description ### TO LAN SHOBE ###
+ encapsulation dot1Q 14
+ ip address 10.181.14.1 255.255.255.0
+ ip access-group LAN_ACCESS in
+!
+interface GigabitEthernet0/0.2
+ description ### MOBINNET ###
+ encapsulation dot1Q 36
+ ip address 10.191.109.26 255.255.255.252
+!
+interface GigabitEthernet0/0.4
+ description ### LAN-1 ###
+ encapsulation dot1Q 1 native
+ ip address 10.120.107.1 255.255.255.248
+!
+interface GigabitEthernet0/0.5
+ description ### LAN-2 ###
+ encapsulation dot1Q 2
+ ip address 10.120.107.17 255.255.255.240
+!
+interface GigabitEthernet0/0.6
+ description ### LAN-3 ###
+ encapsulation dot1Q 3
+ ip address 10.120.107.33 255.255.255.240
+!
+interface GigabitEthernet0/0.7
+ description ### LAN-4 ###
+ encapsulation dot1Q 4
+ ip address 10.120.107.49 255.255.255.240
+!
+interface GigabitEthernet0/0.8
+ description ### LAN-5 ###
+ encapsulation dot1Q 5
+ ip address 10.120.107.65 255.255.255.192
+!
+interface GigabitEthernet0/0.9
+ description ### LAN-6 ###
+ encapsulation dot1Q 6
+ ip address 10.120.107.129 255.255.255.128
+!
+interface GigabitEthernet0/1
+ no ip address
+ duplex auto
+ speed auto
+!
+interface Serial0/3/0
+ bandwidth 128
+ ip address 10.51.200.2 255.255.255.252
+ encapsulation ppp
+ no fair-queue
+!
+interface Serial0/3/1
+ no ip address
+ shutdown
+ clock rate 2000000
+!
+!
+router eigrp 1000
+ network 10.120.107.0 0.0.0.255
+ network 10.181.14.0 0.0.0.255
+ network 10.251.181.6 0.0.0.0
+ auto-summary
+ eigrp stub connected summary
+!
+!
+router eigrp SEPAH-WEST
+ !
+ address-family ipv4 unicast autonomous-system 504
+  !
+  af-interface Tunnel10
+   authentication mode md5
+   authentication key-chain SEPAH-EIGRP-UNDERLAY
+  exit-af-interface
+  !
+  topology base
+  exit-af-topology
+  network 10.120.107.14 0.0.0.0
+  network 192.168.200.0 0.0.0.3
+ exit-address-family
+!
+router bgp 65510
+ bgp log-neighbor-changes
+ neighbor 192.168.160.1 remote-as 65500
+ neighbor 192.168.160.1 update-source Tunnel9030
+ neighbor 192.168.160.3 remote-as 65500
+ neighbor 192.168.160.3 update-source Tunnel9030
+ neighbor 192.168.224.1 remote-as 65500
+ neighbor 192.168.224.1 update-source Tunnel9010
+ neighbor 192.168.224.3 remote-as 65500
+ neighbor 192.168.224.3 update-source Tunnel9010
+ !
+ address-family ipv4
+  network 10.120.107.0 mask 255.255.255.0
+  network 172.16.20.0 mask 255.255.255.0 backdoor
+  neighbor 192.168.160.1 activate
+  neighbor 192.168.160.3 activate
+  neighbor 192.168.224.1 activate
+  neighbor 192.168.224.3 activate
+ exit-address-family
+!
+ip forward-protocol nd
+!
+no ip http server
+no ip http secure-server
+!
+ip route 10.35.210.1 255.255.255.255 10.191.109.25 name MOBINNET_TUNNEL
+ip route 10.51.20.0 255.255.255.252 10.51.200.1 name NORENTA
+ip route 10.51.200.0 255.255.255.252 10.51.200.1 name NORENTA
+ip route 10.120.107.0 255.255.255.0 Null0
+ip route 10.191.0.0 255.255.255.0 10.191.109.25 name MOBINNET-SEPAH
+!
+ip access-list standard EIGRP_FILTER
+ permit 10.181.14.0 0.0.0.255
+ permit 10.120.107.0 0.0.0.255
+ip access-list standard SNMP
+ permit 10.100.4.67
+ permit 10.100.4.93
+ip access-list standard TELNET
+ permit 10.35.2.11
+ permit 10.35.1.10
+ permit 10.35.1.11
+ permit 10.35.1.12
+ permit 10.35.1.13
+ permit 10.35.2.12
+ permit 10.35.1.17
+ permit 10.35.2.23
+ permit 10.35.2.22
+ permit 10.35.2.21
+ permit 10.35.80.9
+ permit 10.35.80.8
+ permit 10.35.80.3
+ permit 10.35.80.2
+ permit 10.35.80.5
+ permit 10.35.80.4
+ permit 10.35.80.7
+ permit 10.35.80.6
+ permit 10.35.1.248
+ permit 10.35.1.249
+ permit 10.35.1.250
+ permit 10.35.1.246
+ permit 10.35.1.247
+!
+ip access-list extended LAN_ACCESS
+ permit ip any host 10.35.110.110
+ deny   tcp any any range 135 139
+ deny   tcp any any eq 445
+ deny   udp any any range 135 netbios-ss
+ deny   tcp any any eq 4786
+ deny   udp any any eq 18999
+ deny   udp any any eq 1434
+ deny   udp any any eq 1433
+ deny   tcp any any eq 1434
+ deny   tcp any any eq 1026
+ deny   tcp any any eq 4444
+ deny   udp any any eq 445
+ permit ip any 10.0.2.8 0.255.0.0
+ permit ip any 10.0.2.9 0.255.0.0
+ permit ip any 10.0.2.10 0.255.0.0
+ permit ip any 10.0.2.11 0.255.0.0
+ permit ip any 10.0.2.12 0.255.0.0
+ permit ip any 10.0.2.100 0.255.0.0
+ permit ip any 10.0.2.105 0.255.0.0
+ permit ip any 10.0.205.80 0.255.0.0
+ permit tcp any host 10.34.0.30 eq 9070
+ permit tcp any host 10.34.0.30 eq 9081
+ permit tcp any host 10.34.0.30 eq 9091
+ permit tcp any host 10.34.0.30 eq 9080
+ permit tcp any host 10.34.0.30 eq domain
+ permit tcp any host 10.34.0.30 eq 9087
+ permit tcp any host 10.34.0.30 eq 9084
+ permit tcp any host 10.34.0.30 eq 9085
+ permit ip any host 10.34.0.31
+ permit ip any 10.64.255.0 0.0.0.255
+ permit ip any host 10.34.0.32
+ permit tcp any host 10.34.0.33 eq 8080
+ permit ip any host 10.34.0.14
+ permit ip any 10.35.0.0 0.0.255.255
+ permit ip any host 10.10.63.21
+ permit ip any 10.0.202.200 0.255.0.0
+ permit ip 10.0.0.200 0.255.255.0 any
+ permit ip 10.0.0.80 0.255.255.0 any
+ permit ip any 10.0.212.8 0.255.0.0
+ permit ip any 10.0.212.9 0.255.0.0
+ permit ip any 10.0.212.10 0.255.0.0
+ permit ip any 10.0.212.11 0.255.0.0
+ permit ip any 10.0.212.12 0.255.0.0
+ permit ip any 10.0.212.13 0.255.0.0
+ permit ip any 10.0.212.14 0.255.0.0
+ permit ip any 10.0.212.4 0.255.0.0
+ permit ip any 10.0.212.21 0.255.0.0
+ permit ip 10.181.0.60 0.0.255.0 host 172.28.67.10
+ permit tcp any host 10.34.0.34 eq 7300
+ permit ip any 10.10.62.0 0.0.0.255
+ permit ip any 10.120.107.0 0.0.0.255
+!
+dialer-list 1 protocol ip permit
+!
+!
+!
+!
+!
+snmp-server group Sbank v3 auth 
+snmp-server group Sbank v3 priv read Monitoring access SNMP
+snmp-server view Monitoring iso included
+snmp-server community k.e.r RO
+snmp-server community u.r.m RO
+snmp-server host 10.100.4.67 version 3 auth Sphmon 
+tacacs-server timeout 1
+tacacs-server directed-request
+tacacs server ISE-3
+ address ipv4 10.100.4.90
+ key 7 124A15371A4600582F32
+tacacs server ISE-4
+ address ipv4 10.180.12.12
+ key 7 15411B2C0C6727782D2A
+!
+!
+!
+control-plane
+!
+!
+banner login ^C
+##########################################################################
+#                                                                        #
+#       ____  _____ ____   _    _   _    ____    _    _   _ _  __        #
+#      / ___|| ____|  _ \ / \  | | | |  | __ )  / \  | \ | | |/ /        #
+#      \___ \|  _| | |_) / _ \ | |_| |  |  _ \ / _ \ |  \| | ' /         #
+#       ___) | |___|  __/ ___ \|  _  |  | |_) / ___ \| |\  | . \         #
+#      |____/|_____|_| /_/   \_\_| |_|  |____/_/   \_\_| \_|_|\_\        #
+#                                                                        #
+#                                                                        #
+#      -----------------------------------------------------------       #
+#                  UNAUTHORIZED ACCESS IS PROHIBITED                     #
+#      -----------------------------------------------------------       #
+#                                                                        #
+#                                                                        #
+#   You must have explicit authorized permission to access this device   #
+#    All activities performed on this device are logged and monitored    #
+#                                                                        #
+#                                                                        #
+##########################################################################
+^C
+!
+line con 0
+line aux 0
+ exec-timeout 0 0
+ script dialer DIALOUT
+ modem InOut
+ modem autoconfigure type MYMODEM
+ transport input all
+ transport output pad telnet rlogin udptn
+ stopbits 1
+ speed 2400
+ flowcontrol hardware
+line 2
+ no activation-character
+ no exec
+ transport preferred none
+ transport input all
+ transport output pad telnet rlogin lapb-ta mop udptn v120 ssh
+ stopbits 1
+line vty 0 4
+ session-timeout 15 
+ timeout login response 15
+ transport input ssh
+ transport output pad ssh
+line vty 5 15
+ session-timeout 15 
+ timeout login response 15
+ transport input ssh
+ transport output ssh
+!
+scheduler max-task-time 5000
+scheduler allocate 20000 1000
+ntp server 10.35.1.1
+ntp server 172.16.212.90
+end

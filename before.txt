@@ -1,0 +1,423 @@
+Building configuration...
+
+  
+Current configuration : 11612 bytes
+!
+! Last configuration change at 10:40:32 IRST Sat Sep 28 2024 by ansible
+! NVRAM config last updated at 10:40:34 IRST Sat Sep 28 2024 by ansible
+!
+version 15.6
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+!
+hostname KHR-Wbr1507205-R
+!
+boot-start-marker
+boot-end-marker
+!
+!
+no logging buffered
+enable secret 5 $1$TP1R$jA6sRgwmd6lNxTRZ6hvrA1
+!
+aaa new-model
+!
+!
+aaa group server tacacs+ ISE_TACACS
+ server name ISE-3
+ server name ISE-4
+ ip tacacs source-interface GigabitEthernet0/0.6
+!
+aaa authentication login default group ISE_TACACS local
+aaa authentication enable default group ISE_TACACS enable
+aaa authorization console
+aaa authorization config-commands
+aaa authorization exec default group ISE_TACACS local 
+aaa authorization commands 1 default group ISE_TACACS local 
+aaa authorization commands 15 default group ISE_TACACS local 
+aaa accounting exec default start-stop group ISE_TACACS
+aaa accounting commands 1 default start-stop group ISE_TACACS
+aaa accounting commands 15 default start-stop group ISE_TACACS
+!
+!
+!
+!
+!
+!
+aaa session-id common
+clock timezone IRST 3 30
+clock summer-time IRDT date Mar 22 2023 0:00 Sep 22 2023 0:00
+!
+!
+!
+!
+!
+!
+no ip source-route
+!
+!
+!
+!
+!
+!
+no ip bootp server
+no ip domain lookup
+ip domain name Sepah.local
+ip cef
+no ipv6 cef
+!
+multilink bundle-name authenticated
+!
+!
+!
+key chain kowsar
+ key 1
+  key-string 7 082A43591A18171C1712
+ key 2
+  key-string 7 020D0B4C18071D274F47
+key chain SEPAH-EIGRP-UNDERLAY
+ key 1
+  key-string 7 114D4A15373A4A
+!
+crypto pki trustpoint TP-self-signed-209406149
+ enrollment selfsigned
+ subject-name cn=IOS-Self-Signed-Certificate-209406149
+ revocation-check none
+ rsakeypair TP-self-signed-209406149
+!
+!
+crypto pki certificate chain TP-self-signed-209406149
+ certificate self-signed 01
+  30820261 308201CA A0030201 02020101 300D0609 2A864886 F70D0101 04050030 
+  30312E30 2C060355 04031325 494F532D 53656C66 2D536967 6E65642D 43657274 
+  69666963 6174652D 32303934 30363134 39301E17 0D313730 35323730 39333531 
+  365A170D 32303031 30313030 30303030 5A303031 2E302C06 03550403 1325494F 
+  532D5365 6C662D53 69676E65 642D4365 72746966 69636174 652D3230 39343036 
+  31343930 819F300D 06092A86 4886F70D 01010105 0003818D 00308189 02818100 
+  E692EAE1 9FF7C7CE E0CD1EA9 3B08242C C3A39621 A9C1BC42 110E4D7E 8FFE0C2E 
+  D5FFA249 5AD023D8 D0115040 39E3F480 38B5BC61 5B17327D 10B58B8E BF6D37B0 
+  3D0C3A6A BB200A30 C6C12B54 4322E3F8 C1272086 388A6FEA 5C92313D AE4D2BAB 
+  0629B15A 5948BF08 8D0361DC 515537DE E0D6F6C4 54EECBC4 0B8A8B5D 98E0B61D 
+  02030100 01A3818A 30818730 0F060355 1D130101 FF040530 030101FF 30340603 
+  551D1104 2D302B82 294B686F 72617361 6E52617A 6176692D 4D617368 6861642D 
+  47686172 616E692E 6B6F7773 61722E63 6F6D301F 0603551D 23041830 168014EA 
+  1FCDF477 9E32C859 0D5D3F0B 612E9581 27C02530 1D060355 1D0E0416 0414EA1F 
+  CDF4779E 32C8590D 5D3F0B61 2E958127 C025300D 06092A86 4886F70D 01010405 
+  00038181 000D9558 2670FE51 6E91A73F A199F88F 74C81B45 FAFD85B3 52B51DA8 
+  0F2C7200 657632A6 7686C300 4F909CEB 573931EC EE7CECA3 48910474 9D8C6F30 
+  1124C7F4 3B2066E6 3B9567FB E3146600 76AF9649 7260DE79 1A5DCB02 3D488151 
+  9F4E35F5 403E1E38 350A2781 B467C414 696D9CB5 B4F5C3F2 62613B92 D6BD8776 
+  8A64F3FA A5
+  	quit
+license udi pid CISCO2911/K9 sn FHK1444F1Q3
+license boot module c2900 technology-package securityk9
+!
+!
+username spbnk privilege 15 secret 5 $1$IHlx$XbTRcBtwrNHNnTsX2RF4m0
+!
+redundancy
+!
+!
+!
+!
+!
+! 
+!
+crypto isakmp policy 110
+ encr aes 192
+ authentication pre-share
+ group 5
+crypto isakmp key 3p@h!p$3c# address 10.191.0.2     
+crypto isakmp key 3p@h!p$3c# address 10.191.0.12    
+crypto isakmp key 3p@h!p$3c# address 10.161.65.13   
+crypto isakmp key 3p@h!p$3c# address 10.161.65.14   
+!
+!
+crypto ipsec transform-set SEP-TR-IPSEC esp-aes 192 esp-sha-hmac 
+ mode tunnel
+!
+crypto ipsec profile SEP-PR-IPSEC
+ set transform-set SEP-TR-IPSEC 
+!
+!
+!
+!
+!
+!
+interface Loopback10
+ description [Routing-EIGRP-TDM]
+ ip address 10.80.77.1 255.255.255.255
+!
+interface Tunnel4
+ bandwidth 1024
+ ip address 192.168.84.10 255.255.255.252
+ ip mtu 1460
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.82.10
+ tunnel destination 10.51.8.2
+!
+interface Tunnel15
+ description MOBIN_NET
+ ip address 192.168.133.202 255.255.255.252
+ keepalive 5 4
+ tunnel source 10.191.165.146
+ tunnel destination 10.191.0.2
+!
+interface Tunnel9010
+ description [DMVPN-FOR-TDM]
+ bandwidth 1024
+ ip address 192.168.229.241 255.255.224.0
+ no ip redirects
+ ip mtu 1400
+ ip nhrp authentication $3p@H!
+ ip nhrp map 192.168.224.1 10.161.65.13
+ ip nhrp map multicast 10.161.65.13
+ ip nhrp map 192.168.224.3 10.181.1.253
+ ip nhrp map multicast 10.181.1.253
+ ip nhrp network-id 101
+ ip nhrp nhs 192.168.224.1
+ ip nhrp nhs 192.168.224.3
+ ip tcp adjust-mss 1360
+ tunnel source Loopback10
+ tunnel mode gre multipoint
+ tunnel key 101
+!
+interface Tunnel9030
+ description [DMVPN-FOR-TDLTE-MOBINNET]
+ bandwidth 2048
+ ip address 192.168.165.241 255.255.224.0
+ no ip redirects
+ ip mtu 1400
+ ip nhrp authentication $3p@H!
+ ip nhrp map 192.168.160.1 10.191.0.2
+ ip nhrp map multicast 10.191.0.2
+ ip nhrp map 192.168.160.3 10.191.0.12
+ ip nhrp map multicast 10.191.0.12
+ ip nhrp network-id 303
+ ip nhrp nhs 192.168.160.1
+ ip nhrp nhs 192.168.160.3
+ ip tcp adjust-mss 1360
+ tunnel source 10.191.165.146
+ tunnel mode gre multipoint
+ tunnel key 303
+!
+interface Tunnel806840
+ description MobinNet-L3-Kosar
+ ip address 10.10.240.124 255.255.254.0
+ ip mtu 1450
+ ip hold-time eigrp 1 35
+ no ip next-hop-self eigrp 1
+ no ip split-horizon eigrp 1
+ ip nhrp map multicast 10.191.160.2
+ ip nhrp map 10.10.240.1 10.191.160.2
+ ip nhrp network-id 240
+ ip nhrp holdtime 100
+ ip nhrp nhs 10.10.240.1
+ shutdown
+ keepalive 10 3
+ tunnel source 10.191.165.146
+ tunnel destination 10.191.160.2
+ tunnel key 240
+!
+interface Embedded-Service-Engine0/0
+ no ip address
+ shutdown
+!
+interface GigabitEthernet0/0
+ description Connected To LAN
+ no ip address
+ no ip proxy-arp
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/0.3
+ description Sepah-Lan
+ encapsulation dot1Q 3
+!
+interface GigabitEthernet0/0.6
+ description Sepah-Lan
+ encapsulation dot1Q 6
+ ip address 10.80.68.1 255.255.255.0
+!
+interface GigabitEthernet0/1
+ description Wimax-MobinNet-L3
+ ip address 10.191.165.146 255.255.255.252
+ no ip proxy-arp
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/2
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+!
+interface Serial0/0/0
+ description Connected To PTMP
+ ip address 10.51.254.50 255.255.255.252
+ encapsulation ppp
+!
+interface Serial0/1/0
+ no ip address
+ shutdown
+ clock rate 2000000
+!
+interface Serial0/1/1
+ description [Tellabs-Norenta]
+ ip address 10.51.82.10 255.255.255.252
+ encapsulation ppp
+!
+!
+router eigrp 1
+ network 10.10.240.0 0.0.1.255
+ network 10.51.253.0 0.0.0.255
+ network 10.80.68.0 0.0.0.255
+ passive-interface GigabitEthernet0/0.6
+ eigrp stub connected
+!
+!
+router eigrp SEPAH-EAST
+ !
+ address-family ipv4 unicast autonomous-system 503
+  !
+  af-interface Tunnel4
+   authentication mode md5
+   authentication key-chain SEPAH-EIGRP-UNDERLAY
+  exit-af-interface
+  !
+  topology base
+  exit-af-topology
+  network 10.80.68.0 0.0.0.255
+  network 10.80.77.0 0.0.0.255
+  network 10.80.77.1 0.0.0.0
+  network 192.168.84.8 0.0.0.3
+  eigrp stub connected
+ exit-address-family
+!
+router bgp 65510
+ bgp log-neighbor-changes
+ neighbor 192.168.160.1 remote-as 65500
+ neighbor 192.168.160.1 update-source Tunnel9030
+ neighbor 192.168.160.3 remote-as 65500
+ neighbor 192.168.160.3 update-source Tunnel9030
+ neighbor 192.168.224.1 remote-as 65500
+ neighbor 192.168.224.1 update-source Tunnel9010
+ neighbor 192.168.224.3 remote-as 65500
+ neighbor 192.168.224.3 update-source Tunnel9010
+ !
+ address-family ipv4
+  network 10.80.68.0 mask 255.255.255.0
+  network 172.16.8.0 mask 255.255.255.0 backdoor
+  neighbor 192.168.160.1 activate
+  neighbor 192.168.160.3 activate
+  neighbor 192.168.224.1 activate
+  neighbor 192.168.224.3 activate
+ exit-address-family
+!
+ip forward-protocol nd
+!
+no ip http server
+ip http authentication local
+no ip http secure-server
+ip http timeout-policy idle 60 life 86400 requests 10000
+!
+ip route 0.0.0.0 0.0.0.0 Serial0/0/0
+ip route 10.51.8.0 255.255.255.252 10.51.82.9 name NORENTA
+ip route 10.80.68.0 255.255.255.0 Null0
+ip route 10.191.0.0 255.255.255.240 10.191.165.145 name MobinNet-SepahHQ
+ip route 10.191.160.0 255.255.255.248 10.191.165.145 name MobinNet-Kosar
+ip ssh version 2
+!
+ip access-list standard SNMP
+ permit 10.100.4.67
+ permit 10.100.4.93
+!
+ip access-list extended access
+ permit ip 192.168.0.0 0.0.0.255 10.51.14.0 0.0.0.255
+ permit ip 192.168.5.0 0.0.0.255 10.51.14.0 0.0.0.255
+ permit ip 172.16.100.0 0.0.0.255 10.51.14.0 0.0.0.255
+ permit ip 172.31.248.0 0.0.0.255 10.51.14.0 0.0.0.255
+ permit ip 192.168.99.0 0.0.0.255 10.51.14.0 0.0.0.255
+ permit ip 192.168.65.0 0.0.0.255 10.51.14.0 0.0.0.255
+ permit ip 10.51.1.0 0.0.0.255 10.51.14.0 0.0.0.255
+!
+no logging trap
+!
+!
+snmp-server group Sbank v3 auth 
+snmp-server group Sbank v3 priv read Monitoring access SNMP
+snmp-server view Monitoring iso included
+snmp-server host 10.100.4.67 version 3 auth Sphmon 
+snmp-server host 10.100.4.93 version 3 auth Sphmon 
+tacacs-server timeout 1
+tacacs-server directed-request
+tacacs server ISE-3
+ address ipv4 10.100.4.90
+ key 7 101D19390D5A1E57091D
+tacacs server ISE-4
+ address ipv4 10.180.12.12
+ key 7 13560732034108762E3D
+access-list 2 permit 10.191.160.2
+access-list 2 permit 192.168.5.34
+access-list 2 permit 192.168.51.1
+access-list 2 permit 192.168.0.242
+access-list 2 permit 192.168.0.214
+access-list 2 permit 10.51.254.1
+access-list 2 permit 192.168.0.187
+access-list 2 permit 10.254.4.1
+access-list 2 permit 10.10.240.1
+access-list 2 permit 10.254.1.1
+access-list 2 permit 192.168.0.157
+access-list 2 permit 10.51.254.49
+access-list 9 permit 192.168.0.157
+access-list 10 permit 192.168.0.186
+!
+!
+!
+control-plane
+!
+!
+ vstack
+banner login ^C
+##########################################################################
+#                                                                        #
+#       ____  _____ ____   _    _   _    ____    _    _   _ _  __        #
+#      / ___|| ____|  _ \ / \  | | | |  | __ )  / \  | \ | | |/ /        #
+#      \___ \|  _| | |_) / _ \ | |_| |  |  _ \ / _ \ |  \| | ' /         #
+#       ___) | |___|  __/ ___ \|  _  |  | |_) / ___ \| |\  | . \         #
+#      |____/|_____|_| /_/   \_\_| |_|  |____/_/   \_\_| \_|_|\_\        #
+#                                                                        #
+#                                                                        #
+#      -----------------------------------------------------------       #
+#                  UNAUTHORIZED ACCESS IS PROHIBITED                     #
+#      -----------------------------------------------------------       #
+#                                                                        #
+#                                                                        #
+#   You must have explicit authorized permission to access this device   #
+#    All activities performed on this device are logged and monitored    #
+#                                                                        #
+#                                                                        #
+##########################################################################
+^C
+!
+line con 0
+line aux 0
+ no exec
+line 2
+ no activation-character
+ no exec
+ transport preferred none
+ transport output none
+ stopbits 1
+line vty 0 4
+ session-timeout 15 
+ transport input ssh
+line vty 5 15
+ session-timeout 15 
+ transport input ssh
+!
+no scheduler allocate
+ntp server 172.16.212.90
+!
+end

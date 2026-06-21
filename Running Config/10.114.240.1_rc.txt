@@ -1,0 +1,2744 @@
+Building configuration...
+
+
+Current configuration : 77419 bytes
+!
+! Last configuration change at 13:38:03 Tehran Sat Oct 19 2024 by h.mehrabi
+! NVRAM config last updated at 13:27:30 Tehran Sat Oct 19 2024 by h.mehrabi
+!
+version 15.5
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+service unsupported-transceiver
+no platform punt-keepalive disable-kernel-core
+!
+hostname FRS-Wbd1500463-R
+!
+boot-start-marker
+boot system disk2:isr4400-universalk9.03.16.04b.S.155-3.S4b-ext.SPA.bin
+boot-end-marker
+!
+!
+vrf definition Mgmt-intf
+ !
+ address-family ipv4
+ exit-address-family
+ !
+ address-family ipv6
+ exit-address-family
+!
+card type e1 0 1
+! card type command needed for slot/bay 0/2
+logging exception 64000
+logging buffered 64000
+enable secret 5 $1$6d0j$mOMwSj2p/iquytO7Td2rV.
+!
+aaa new-model
+!
+!
+aaa group server tacacs+ ISE_GROUP
+ server 10.100.4.90
+ server 10.100.4.91
+!
+aaa authentication login default group ISE_GROUP local
+aaa authentication enable default group ISE_GROUP enable
+aaa authorization config-commands
+aaa authorization exec default local group tacacs+ if-authenticated 
+aaa authorization exec AAA group ISE_GROUP local 
+aaa authorization commands 0 AAA group ISE_GROUP local 
+aaa authorization commands 1 AAA group ISE_GROUP local 
+aaa authorization commands 7 AAA group ISE_GROUP local 
+aaa authorization commands 15 AAA group ISE_GROUP local 
+aaa authorization network default local 
+aaa accounting exec default
+ action-type start-stop
+ group ISE_GROUP
+!
+aaa accounting commands 0 default
+ action-type start-stop
+ group ISE_GROUP
+!
+aaa accounting commands 1 default
+ action-type start-stop
+ group ISE_GROUP
+!
+aaa accounting commands 7 default
+ action-type start-stop
+ group ISE_GROUP
+!
+aaa accounting commands 15 default
+ action-type start-stop
+ group ISE_GROUP
+!
+!
+!
+!
+!
+!
+!
+aaa session-id common
+clock timezone Tehran 3 30
+clock summer-time TEH date Mar 22 2022 0:00 Sep 22 2022 0:00
+!
+!
+!
+
+no ip domain lookup
+ip domain name Sepah.local
+ip dhcp excluded-address 10.114.49.125 10.114.49.126
+ip dhcp excluded-address 10.114.49.123 10.114.49.124
+ip dhcp excluded-address 10.114.49.66
+!
+ip dhcp pool vlan50
+ network 10.114.49.64 255.255.255.192
+ default-router 10.114.49.65 
+ dns-server 172.16.208.1 
+ lease 8
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+subscriber templating
+!
+multilink bundle-name authenticated
+!
+flow record SEP_Netflow_Record
+ match ipv4 tos
+ match ipv4 protocol
+ match ipv4 source address
+ match ipv4 destination address
+ match transport source-port
+ match transport destination-port
+ match interface input
+ collect interface output
+ collect counter bytes
+ collect counter packets
+ collect application name
+!
+!
+flow exporter SEP_Netflow_Export
+ destination 128.212.249.120
+ source GigabitEthernet0/0/1
+ transport udp 2055
+!
+!
+flow monitor SEP_Netflow_Monitor
+ exporter SEP_Netflow_Export
+ cache timeout active 3600
+ record SEP_Netflow_Record
+!
+!
+chat-script 25 ti 25-26
+!
+key chain SEPAH-EIGRP-UNDERLAY
+ key 1
+   key-string 7 1556581C24026A
+!
+!
+!
+license udi pid ISR4451-X/K9 sn FOC21134YQZ
+license boot level securityk9
+archive
+ log config
+  logging enable
+  notify syslog contenttype plaintext
+  hidekeys
+ path tftp://172.16.213.26/Backup-ro/FARS-ICT-config
+ write-memory
+ time-period 10080
+!
+spanning-tree extend system-id
+no errdisable detect cause dtp-flap
+no errdisable detect cause link-flap
+no errdisable detect cause bpduguard
+!
+username spbnk privilege 15 secret 5 $1$pa7h$vVT66mi.ikXAjKt80ehZz/
+username spbd privilege 15 secret 5 $1$kLmB$Zmv8EbcybcNUpE.vTC3/M.
+!
+redundancy
+ mode none
+!
+!
+!
+!
+controller E1 0/1/0
+ framing no-crc4 
+ description [Zir-Sakht1]
+!
+controller E1 0/1/1
+ framing no-crc4 
+ description [Zir-Sakht2]
+!
+controller E1 0/1/2
+ framing no-crc4 
+ description [Zir-Sakht3]
+!
+controller E1 0/1/3
+ framing no-crc4 
+ description [Zir-Sakht4]
+!
+controller E1 0/1/4
+ framing no-crc4 
+ description [Zir-Sakht5]
+!
+controller E1 0/1/5
+ framing no-crc4 
+ description [Zir-Sakht6]
+!
+controller E1 0/1/6
+ framing no-crc4 
+ description [Zir-Sakht7]
+!
+controller E1 0/1/7
+ framing no-crc4 
+ description [Zir-Sakht8]
+!
+!
+vlan internal allocation policy ascending
+!
+! 
+!
+!
+!
+!
+!
+crypto isakmp policy 110
+ encr aes 192
+ authentication pre-share
+ group 5
+crypto isakmp key 3p@h!p$3c# address 10.191.0.2     
+crypto isakmp key 3p@h!p$3c# address 10.191.0.12    
+crypto isakmp key 3p@h!p$3c# address 10.161.65.13   
+crypto isakmp key 3p@h!p$3c# address 10.161.65.14   
+!
+!
+crypto ipsec transform-set SEP-TR-IPSEC esp-aes 192 esp-sha-hmac 
+ mode tunnel
+!
+crypto ipsec profile SEP-PR-IPSEC
+ set transform-set SEP-TR-IPSEC 
+!
+!
+!
+!
+!
+!
+! 
+! 
+! 
+! 
+! 
+! 
+!
+!
+interface Loopback10
+ description [Routing-EIGRP-TDM]
+ ip address 10.114.62.62 255.255.255.255
+!
+interface Loopback20
+ description [Routing-EIGRP-MPLS]
+ ip address 10.114.62.61 255.255.255.255
+!
+interface Tunnel0
+ description [MPLS-80M-368900]
+ bandwidth 81920
+ ip address 192.168.63.158 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.175.20.226
+ tunnel destination 172.17.15.6
+!
+interface Tunnel1
+ description [Neuronta-BeinOstani]
+ bandwidth 20480
+ ip address 192.168.63.42 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 172.17.18.42
+ tunnel destination 172.17.18.2
+!
+interface Tunnel6
+ description [ATM-0406-6096]
+ ip address 192.168.14.25 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 172.24.14.2
+ tunnel destination 172.24.114.158
+!
+interface Tunnel11
+ description [1308-ADSL]
+ bandwidth 2048
+ ip address 192.168.14.45 255.255.255.252
+ ip mtu 1500
+ ip tcp adjust-mss 1360
+ shutdown
+ keepalive 5 4
+ tunnel source 172.24.14.2
+ tunnel destination 172.24.114.142
+!
+interface Tunnel14
+ description [ATM-7303-2058]
+ ip address 192.168.14.57 255.255.255.252
+ ip tcp adjust-mss 1360
+ tunnel source 172.24.14.2
+ tunnel destination 172.24.114.166
+!
+interface Tunnel30
+ description [0380-G.]
+ bandwidth 1024
+ ip address 192.168.14.121 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 172.24.14.2
+ tunnel destination 172.24.14.54
+!
+interface Tunnel42
+ description [0626-G.]
+ bandwidth 2048
+ ip address 192.168.14.169 255.255.255.252
+ ip tcp adjust-mss 1360
+ shutdown
+ keepalive 5 4
+ tunnel source 172.24.14.2
+ tunnel destination 172.24.14.110
+!
+interface Tunnel61
+ description [1228-G.]
+ bandwidth 1024
+ ip address 192.168.14.245 255.255.255.252
+ ip tcp adjust-mss 1360
+ shutdown
+ keepalive 5 4
+ tunnel source 172.24.14.2
+ tunnel destination 172.24.14.222
+!
+interface Tunnel98
+ description BJ-2207-ShahrakSanaati
+ ip address 192.168.114.141 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 172.24.14.2
+ tunnel destination 172.24.114.186
+!
+interface Tunnel105
+ description 1501630-BJ-Gas5
+ bandwidth 1024
+ ip address 192.168.114.169 255.255.255.252
+ ip mtu 1500
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 172.24.14.2
+ tunnel destination 172.24.114.194
+!
+interface Tunnel107
+ description 1503801-MPLS
+ ip address 192.168.14.37 255.255.255.252
+ ip mtu 1500
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 172.24.14.2
+ tunnel destination 172.24.214.226
+!
+interface Tunnel108
+ description ATM-1474-7304
+ ip address 192.168.14.61 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 172.24.14.2
+ tunnel destination 172.24.114.162
+!
+interface Tunnel109
+ description ATM-1503349-Tip33AlmahdiB
+ ip address 192.168.14.69 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 172.24.14.2
+ tunnel destination 172.24.214.234
+!
+interface Tunnel110
+ description 1503356-bazarganan-MPLS
+ ip address 192.168.14.77 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 172.24.14.2
+ tunnel destination 172.24.214.238
+!
+interface Tunnel111
+ description 1503969-Aghaei-MPLS
+ ip address 192.168.14.117 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 172.24.14.2
+ tunnel destination 172.24.214.242
+!
+interface Tunnel112
+ description 1503982-banihashem-MPLS
+ ip address 192.168.14.125 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 172.24.14.2
+ tunnel destination 172.24.214.246
+!
+interface Tunnel150
+ description [0016-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.5 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.6
+!
+interface Tunnel151
+ description [0041-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.9 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.10
+!
+interface Tunnel152
+ description [0058-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.13 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.14
+!
+interface Tunnel153
+ description [0062-Tellabs-2M]
+ bandwidth 512
+ ip address 192.168.142.17 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.18
+!
+interface Tunnel154
+ description [0082-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.21 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.22
+!
+interface Tunnel155
+ description [0120-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.25 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.26
+!
+interface Tunnel156
+ description [0122-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.29 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.30
+!
+interface Tunnel157
+ description [0124-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.33 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.34
+!
+interface Tunnel158
+ description [0167-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.37 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.38
+!
+interface Tunnel159
+ description [0207-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.41 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.42
+!
+interface Tunnel160
+ description [0226-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.45 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.46
+!
+interface Tunnel161
+ description [0327-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.49 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.50
+!
+interface Tunnel162
+ description [0356-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.53 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.54
+!
+interface Tunnel163
+ description [0380-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.57 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.58
+!
+interface Tunnel164
+ description [0406-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.61 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.62
+!
+interface Tunnel165
+ description [0425-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.65 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.66
+!
+interface Tunnel166
+ description [0451-Tellabs-448k]
+ bandwidth 448
+ ip address 192.168.14.9 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.70
+!
+interface Tunnel167
+ description [0452-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.73 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.74
+!
+interface Tunnel168
+ description [0474-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.77 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.78
+!
+interface Tunnel169
+ description [0504-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.81 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.82
+!
+interface Tunnel170
+ description [0512-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.85 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.86
+!
+interface Tunnel171
+ description [0558-Tellabs-512k]
+ bandwidth 512
+ ip address 192.168.142.89 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.90
+!
+interface Tunnel172
+ description [0567-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.93 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.94
+!
+interface Tunnel173
+ description [0578-Tellabs-512k]
+ bandwidth 512
+ ip address 192.168.142.97 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.98
+!
+interface Tunnel174
+ description [0580-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.101 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.102
+!
+interface Tunnel175
+ description [0626-Tellabs-448k]
+ bandwidth 448
+ ip address 192.168.142.105 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.106
+!
+interface Tunnel176
+ description [0632-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.109 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.110
+!
+interface Tunnel177
+ description [0646-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.113 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.114
+!
+interface Tunnel178
+ description [0654-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.117 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.118
+!
+interface Tunnel179
+ description [0667-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.121 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.122
+!
+interface Tunnel180
+ description [0668-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.125 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.126
+!
+interface Tunnel181
+ description [0709-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.129 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.130
+!
+interface Tunnel182
+ description [0717-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.133 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.134
+!
+interface Tunnel183
+ description [0749-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.137 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.138
+!
+interface Tunnel184
+ description [0761-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.141 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.142
+!
+interface Tunnel185
+ description [0769-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.145 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.146
+!
+interface Tunnel186
+ description [0776-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.149 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.150
+!
+interface Tunnel187
+ description [0784-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.153 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.154
+!
+interface Tunnel188
+ description [0787-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.157 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.158
+!
+interface Tunnel189
+ description [0816-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.161 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.162
+!
+interface Tunnel190
+ description [0861-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.165 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.166
+!
+interface Tunnel191
+ description [0894-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.173 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.174
+!
+interface Tunnel192
+ description [0910-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.177 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.178
+!
+interface Tunnel193
+ description 1503969-Tellabs-pasdaran]
+ ip address 192.168.142.229 255.255.255.252
+ ip tcp adjust-mss 1360
+ shutdown
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.170
+!
+interface Tunnel194
+ description [0911-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.181 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.182
+!
+interface Tunnel195
+ description [0927-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.185 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.186
+!
+interface Tunnel196
+ description [1088-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.189 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.190
+!
+interface Tunnel197
+ description [1091-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.193 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.194
+!
+interface Tunnel198
+ description [1180-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.197 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.198
+!
+interface Tunnel199
+ description [1209-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.201 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.202
+!
+interface Tunnel200
+ description [1228-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.205 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.206
+!
+interface Tunnel201
+ description [1285-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.209 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.210
+!
+interface Tunnel202
+ description [1304-Tellabs-512k]
+ bandwidth 512
+ ip address 192.168.142.213 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.214
+!
+interface Tunnel203
+ description [1305-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.217 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.218
+!
+interface Tunnel204
+ description [1308-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.221 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.222
+!
+interface Tunnel205
+ description [1321-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.225 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.226
+!
+interface Tunnel207
+ description [1328-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.233 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.234
+!
+interface Tunnel208
+ description [1398-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.237 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.238
+!
+interface Tunnel209
+ description [1400-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.241 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.242
+!
+interface Tunnel210
+ description [1459-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.245 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.246
+!
+interface Tunnel211
+ description [1466-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.249 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.250
+!
+interface Tunnel212
+ description [1530-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.142.253 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.14.254
+!
+interface Tunnel213
+ description [1630-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.143.1 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.114.2
+!
+interface Tunnel214
+ description [1745-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.143.5 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.114.174
+!
+interface Tunnel215
+ description [1746-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.143.9 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.114.10
+!
+interface Tunnel216
+ description [1799-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.143.13 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.114.14
+!
+interface Tunnel217
+ description [1820-Tellabs-2M]
+ ip address 192.168.143.17 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.114.18
+!
+interface Tunnel218
+ description [1886-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.143.21 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.114.22
+!
+interface Tunnel219
+ description [1900-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.143.25 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.114.26
+!
+interface Tunnel220
+ description [1904-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.143.29 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.114.30
+!
+interface Tunnel221
+ description [1908-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.143.33 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.114.34
+!
+interface Tunnel222
+ description [2042-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.143.37 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.114.38
+!
+interface Tunnel223
+ description [2046-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.143.41 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.114.42
+!
+interface Tunnel224
+ description [2047-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.143.45 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.114.46
+!
+interface Tunnel225
+ description [2058-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.143.49 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.114.50
+!
+interface Tunnel226
+ description [2115-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.143.53 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.114.54
+!
+interface Tunnel227
+ description [2136-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.143.57 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.114.58
+!
+interface Tunnel229
+ description [1503801-Tellabs-2M]
+ bandwidth 2048
+ ip address 192.168.143.65 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.114.66
+!
+interface Tunnel230
+ description [5319-Tellabs-2M]
+ ip address 192.168.140.185 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.186
+!
+interface Tunnel231
+ description 1500062-BJ-Lar
+ bandwidth 512
+ ip address 192.168.143.73 255.255.255.252
+ ip tcp adjust-mss 1360
+ shutdown
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.114.74
+!
+interface Tunnel233
+ description [BJ-2102-GasTransport]
+ bandwidth 2048
+ ip address 192.168.143.81 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.114.82
+!
+interface Tunnel234
+ description [BJ-1474-ZahedShahr]
+ bandwidth 2048
+ ip address 192.168.143.85 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.114.86
+!
+interface Tunnel399
+ description [SEPAH-MEHR-Tellabs-Norenta-ip lan =>5320
+ bandwidth 2048
+ ip address 192.168.114.173 255.255.255.252
+ ip mtu 1500
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.114.150
+!
+interface Tunnel401
+ description mehr-1505315-2223707
+ ip address 192.168.140.5 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.6
+!
+interface Tunnel402
+ description mehr-1505317-2223923
+ ip address 192.168.140.9 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.10
+!
+interface Tunnel403
+ description mehr-1505318-2223924
+ ip address 192.168.140.13 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.14
+!
+interface Tunnel404
+ description mehr-1505330-2223963
+ ip address 192.168.140.17 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.18
+!
+interface Tunnel405
+ description mehr-1505332-2223968
+ ip address 192.168.140.21 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.22
+!
+interface Tunnel406
+ description mehr-1505346-2224085
+ ip address 192.168.140.25 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.26
+!
+interface Tunnel407
+ description mehr-1505347-2224089
+ ip address 192.168.140.29 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.30
+!
+interface Tunnel408
+ description mehr-1505349-2224091
+ ip address 192.168.140.33 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.34
+!
+interface Tunnel409
+ description mehr-1505351-222409
+ ip address 192.168.140.37 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.38
+!
+interface Tunnel410
+ description mehr-1505352-2224114
+ ip address 192.168.140.41 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.42
+!
+interface Tunnel413
+ description mehr-1505308-2223688
+ ip address 192.168.140.45 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.46
+!
+interface Tunnel415
+ description mehr-9902223695 
+ ip address 192.168.140.53 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.54
+!
+interface Tunnel416
+ description mehr-1505311-9902223697
+ ip address 192.168.140.57 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.58
+!
+interface Tunnel418
+ description mehr-9902223922 
+ ip address 192.168.140.65 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.66
+!
+interface Tunnel419
+ description mehr-1505321-2238866
+ ip address 192.168.140.69 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.70
+!
+interface Tunnel420
+ description mehr-9902223929 
+ ip address 192.168.140.73 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.74
+!
+interface Tunnel421
+ description mehr-9902223932 
+ ip address 192.168.140.77 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.78
+!
+interface Tunnel423
+ description mehr-1505327-2223939
+ ip address 192.168.140.85 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.86
+!
+interface Tunnel424
+ description mehr-1505328-2238867
+ ip address 192.168.140.89 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.90
+!
+interface Tunnel427
+ description mehr-1505336-2223992
+ ip address 192.168.140.101 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.102
+!
+interface Tunnel428
+ description mehr-9902223996 
+ ip address 192.168.140.105 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.106
+!
+interface Tunnel429
+ description mehr-9902224015 
+ ip address 192.168.140.109 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.110
+!
+interface Tunnel430
+ description mehr-9902224075 
+ ip address 192.168.140.113 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.114
+!
+interface Tunnel431
+ description mehr-9902224078 
+ ip address 192.168.140.117 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.118
+!
+interface Tunnel432
+ description mehr-9902224079 
+ ip address 192.168.140.121 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.122
+!
+interface Tunnel435
+ description mehr-1505348-2224090
+ bandwidth 1024
+ ip address 192.168.140.133 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.134
+!
+interface Tunnel438
+ description mehr-1505320-2276067
+ bandwidth 1024
+ ip address 192.168.141.97 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.141.98
+!
+interface Tunnel440
+ description hekmat-1508086-2224165
+ ip address 192.168.140.141 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.142
+!
+interface Tunnel441
+ description hekmat-1508087-2229519
+ ip address 192.168.140.145 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.146
+!
+interface Tunnel442
+ description hekmat-1508088-2229528
+ ip address 192.168.140.149 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.150
+!
+interface Tunnel447
+ description 1507236-kosar-9902245501
+ bandwidth 1024
+ ip address 192.168.141.33 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.141.34
+!
+interface Tunnel448
+ description kosar-9902245506
+ bandwidth 1024
+ ip address 192.168.141.37 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.141.38
+!
+interface Tunnel449
+ description kosar-9902245511
+ bandwidth 1024
+ ip address 192.168.141.41 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.141.42
+!
+interface Tunnel450
+ description kosar-9902245516
+ bandwidth 1024
+ ip address 192.168.141.45 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.141.46
+!
+interface Tunnel451
+ description kosar-9902245523-1507240
+ bandwidth 1024
+ ip address 192.168.141.49 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.141.50
+!
+interface Tunnel453
+ description kosar-9902245532
+ bandwidth 1024
+ ip address 192.168.141.57 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.141.58
+!
+interface Tunnel456
+ description kosar-9902245554
+ bandwidth 1024
+ ip address 192.168.141.69 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.141.70
+!
+interface Tunnel458
+ description kosar-9902245559-1507248
+ bandwidth 1024
+ ip address 192.168.141.73 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.141.74
+!
+interface Tunnel471
+ description ghavamin-1506220-152571217
+ bandwidth 2048
+ ip address 192.168.144.217 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.126
+!
+interface Tunnel472
+ description ghavamin-1506204-2246134
+ ip address 192.168.140.169 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.170
+!
+interface Tunnel473
+ description ghavamin-1506198-2246133
+ ip address 192.168.140.173 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.174
+!
+interface Tunnel477
+ description ghavamin-1506207-2246129
+ ip address 192.168.140.189 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.190
+!
+interface Tunnel478
+ description ghavamin-1506217-2246128
+ ip address 192.168.140.193 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.194
+!
+interface Tunnel479
+ description ghavamin-1506197-2246127
+ ip address 192.168.140.197 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.198
+!
+interface Tunnel480
+ description ghavamin-1506206-2246126
+ ip address 192.168.140.201 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.202
+!
+interface Tunnel482
+ description ghavamin-1506225-2246123
+ ip address 192.168.140.209 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.210
+!
+interface Tunnel484
+ description ghavamin-1506219-2246121
+ ip address 192.168.140.217 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.218
+!
+interface Tunnel485
+ description ghavamin-1506212-2246120
+ ip address 192.168.140.221 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.222
+!
+interface Tunnel488
+ description ghavamin-1506218-9902246117
+ ip address 192.168.140.233 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.234
+!
+interface Tunnel489
+ description ghavamin-1506214-2246116
+ ip address 192.168.140.237 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.238
+!
+interface Tunnel490
+ description ghavamin-1506196-2246115
+ ip address 192.168.140.241 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.242
+!
+interface Tunnel491
+ description ghavamin-1506201-2246114
+ ip address 192.168.140.245 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.246
+!
+interface Tunnel492
+ description ghavamin-1506202-2246113
+ ip address 192.168.140.249 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.250
+!
+interface Tunnel493
+ description ghavamin-1506194-2246112
+ ip address 192.168.140.253 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.140.254
+!
+interface Tunnel494
+ description ghavamin-1506209-2246111
+ ip address 192.168.141.1 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.141.2
+!
+interface Tunnel496
+ description ghavamin-1506192-2247246
+ ip address 192.168.141.9 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.141.10
+!
+interface Tunnel497
+ description ghavamin-1506221-2247247
+ ip address 192.168.141.13 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.141.14
+!
+interface Tunnel498
+ description ghavamin-1506226-2247248
+ ip address 192.168.141.17 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.141.18
+!
+interface Tunnel499
+ description ghavamin-1506215-2247249
+ ip address 192.168.141.21 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.141.22
+!
+interface Tunnel500
+ description ghavamin-1506205-503190
+ bandwidth 1024
+ ip address 192.168.141.89 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.141.90
+!
+interface Tunnel501
+ description ghavamin-1506227-2249201
+ ip address 192.168.141.29 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.141.30
+!
+interface Tunnel502
+ description [SEPAH-ANSAR-25M]
+ bandwidth 25600
+ ip address 192.168.114.57 255.255.255.252
+ ip mtu 1400
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.114.154
+!
+interface Tunnel503
+ description ansar-1503357-500136
+ bandwidth 2048
+ ip address 192.168.144.1 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.2
+!
+interface Tunnel504
+ description ansar-1503320-212309
+ bandwidth 2048
+ ip address 192.168.144.5 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.6
+!
+interface Tunnel505
+ description ansar-1503355-355606
+ bandwidth 2048
+ ip address 192.168.144.9 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.10
+!
+interface Tunnel506
+ description ansar-1503350
+ ip address 192.168.144.13 255.255.255.252
+ ip mtu 1400
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.14
+!
+interface Tunnel507
+ description ansar-1503347-32998
+ bandwidth 2048
+ ip address 192.168.144.17 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.18
+!
+interface Tunnel508
+ description ansar-1503316-9802198916
+ bandwidth 2048
+ ip address 192.168.144.21 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.22
+!
+interface Tunnel509
+ description ansar-1503336-9802198916
+ bandwidth 2048
+ ip address 192.168.144.25 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.26
+!
+interface Tunnel510
+ description ansar-1503351-9802198919
+ bandwidth 2048
+ ip address 192.168.144.29 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.30
+!
+interface Tunnel512
+ description ansar-1503338-9802201049
+ bandwidth 2048
+ ip address 192.168.144.37 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.38
+!
+interface Tunnel513
+ description ansar-15033345-9802201051
+ bandwidth 2048
+ ip address 192.168.144.41 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.42
+!
+interface Tunnel515
+ description ansar-1503792-9802202051
+ bandwidth 2048
+ ip address 192.168.144.49 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.50
+!
+interface Tunnel517
+ description 1503864-ansar-9802201048
+ bandwidth 2048
+ ip address 192.168.144.57 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.58
+!
+interface Tunnel518
+ description ansar-1503742-9802202056
+ bandwidth 2048
+ ip address 192.168.144.61 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.62
+!
+interface Tunnel519
+ description ansar-1503870-9802202057
+ bandwidth 2048
+ ip address 192.168.144.65 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.66
+!
+interface Tunnel521
+ description ansar-1503684-9802202061
+ bandwidth 2048
+ ip address 192.168.144.73 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.74
+!
+interface Tunnel522
+ description ansar-1503824-9802202066
+ bandwidth 2048
+ ip address 192.168.144.77 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.78
+!
+interface Tunnel524
+ description ansar-1503862-9802202068
+ bandwidth 2048
+ ip address 192.168.144.85 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.86
+!
+interface Tunnel525
+ description ansar-1503795-9802202069
+ bandwidth 2048
+ ip address 192.168.144.89 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.90
+!
+interface Tunnel526
+ description ansar-1503852-9802202058
+ bandwidth 2048
+ ip address 192.168.144.93 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.94
+!
+interface Tunnel527
+ description ansar-1503358-9902220059
+ bandwidth 2048
+ ip address 192.168.144.97 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.98
+!
+interface Tunnel528
+ description ansar-1503817-9902220062
+ bandwidth 2048
+ ip address 192.168.144.101 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.102
+!
+interface Tunnel529
+ description ansar-1503352-9802198920
+ bandwidth 2048
+ ip address 192.168.144.105 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.106
+!
+interface Tunnel531
+ description ansar-1503809-9902220060
+ bandwidth 1536
+ ip address 192.168.144.113 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.114
+!
+interface Tunnel532
+ description ansar-1503344-32996
+ bandwidth 1024
+ ip address 192.168.144.117 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.118
+!
+interface Tunnel533
+ description ansar-1503999-9802202060
+ bandwidth 1024
+ ip address 192.168.144.121 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.122
+!
+interface Tunnel534
+ description ansar-1503359-9802198922
+ bandwidth 1024
+ ip address 192.168.144.125 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.126
+!
+interface Tunnel536
+ description ansar-1503342-9902244957
+ bandwidth 2048
+ ip address 192.168.144.133 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.134
+!
+interface Tunnel537
+ description ansar-1503349-9802198918
+ bandwidth 2048
+ ip address 192.168.144.137 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.138
+!
+interface Tunnel538
+ description ansar-1503321-9802198913
+ bandwidth 2048
+ ip address 192.168.144.141 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.142
+!
+interface Tunnel539
+ description ansar-1503327-9802198914
+ bandwidth 2048
+ ip address 192.168.144.145 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.146
+!
+interface Tunnel540
+ description ansar-1503322-9802199117
+ bandwidth 2048
+ ip address 192.168.144.149 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.150
+!
+interface Tunnel541
+ description ansar-1503346-9802199134
+ bandwidth 2048
+ ip address 192.168.144.153 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.154
+!
+interface Tunnel542
+ description ansar-15033326-9802201043
+ bandwidth 2048
+ ip address 192.168.144.157 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.158
+!
+interface Tunnel543
+ description ansar-1503328-9802201044
+ bandwidth 2048
+ ip address 192.168.144.161 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.162
+!
+interface Tunnel544
+ description ansar-1503334-9802201047
+ bandwidth 2048
+ ip address 192.168.144.165 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.166
+!
+interface Tunnel545
+ description ansar-1503339-9802201050
+ bandwidth 2048
+ ip address 192.168.144.169 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.170
+!
+interface Tunnel546
+ description ansar-1503348-9802202075
+ bandwidth 2048
+ ip address 192.168.144.173 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.174
+!
+interface Tunnel547
+ description ansar-1503991-9802202072
+ bandwidth 2048
+ ip address 192.168.144.177 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.178
+!
+interface Tunnel548
+ description ansar-1503330-9802220057
+ bandwidth 2048
+ ip address 192.168.144.181 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.182
+!
+interface Tunnel549
+ description ansar-1503318-9802198902
+ bandwidth 2048
+ ip address 192.168.144.185 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.186
+!
+interface Tunnel550
+ description ansar-1503341-9802199124
+ bandwidth 2048
+ ip address 192.168.144.189 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.190
+!
+interface Tunnel551
+ description ansar-1503319-9802201041
+ bandwidth 2048
+ ip address 192.168.144.193 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.194
+!
+interface Tunnel552
+ description ansar-1503354-9902220056
+ bandwidth 2048
+ ip address 192.168.144.197 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.198
+!
+interface Tunnel553
+ description ansar-1503332-9902220058
+ bandwidth 2048
+ ip address 192.168.144.201 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.202
+!
+interface Tunnel554
+ description ansar-1503337-9802199123
+ bandwidth 2048
+ ip address 192.168.144.205 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.206
+!
+interface Tunnel555
+ description ansar-1503329-9802198915
+ bandwidth 2048
+ ip address 192.168.144.209 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.210
+!
+interface Tunnel556
+ description ansar-1503317-40002305420
+ bandwidth 2048
+ ip address 192.168.144.213 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.142.214
+!
+interface Tunnel600
+ description [SEPAH-SAMEN]
+ ip address 192.168.114.93 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.14.2
+ tunnel destination 10.51.114.170
+!
+interface Tunnel1000
+ description DMVPN-SecondCountryOfOrigin
+ bandwidth 30000
+ ip address 192.168.68.14 255.255.254.0
+ ip nhrp authentication s3p@h5!4
+ ip nhrp map 192.168.68.1 172.17.17.2
+ ip nhrp map multicast 17.17.17.2
+ ip nhrp network-id 514
+ ip nhrp nhs 192.168.68.1
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.175.20.226
+ tunnel destination 172.17.17.2
+!
+interface Tunnel2000
+ description [Wimax]
+ ip address 192.168.0.2 255.255.255.252
+ ip mtu 1452
+ keepalive 5 4
+ tunnel source 10.191.13.202
+ tunnel destination 10.191.0.2
+!
+interface GigabitEthernet0/0/0
+ no ip address
+ negotiation auto
+!
+interface GigabitEthernet0/0/0.2
+ description [Net-Device-1325]
+ encapsulation dot1Q 2
+ ip address 10.114.49.1 255.255.255.224
+!
+interface GigabitEthernet0/0/0.3
+ description [Windows-Service-1325]
+ encapsulation dot1Q 3
+ ip address 10.114.49.33 255.255.255.224
+!
+interface GigabitEthernet0/0/0.5
+ description [ATM-1325]
+ encapsulation dot1Q 5
+ ip address 10.114.49.129 255.255.255.240
+!
+interface GigabitEthernet0/0/0.12
+ description [SEPAH-GHAVAMIN]
+ encapsulation dot1Q 12
+ ip address 172.27.14.5 255.255.255.252
+!
+interface GigabitEthernet0/0/0.50
+ description [Core-Bank-1325]
+ encapsulation dot1Q 50
+ ip address 10.114.49.65 255.255.255.192
+!
+interface GigabitEthernet0/0/0.200
+ description [WIMAX-2M]
+ encapsulation dot1Q 200
+ ip address 10.191.13.202 255.255.255.252
+!
+interface GigabitEthernet0/0/1
+ ip address 172.16.14.1 255.255.255.0
+ ip access-group 2000 in
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet0/0/2
+ description Backup-shoab
+ no ip address
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet0/0/2.600
+ description [VOICE]
+ encapsulation dot1Q 600
+ ip address 10.114.240.1 255.255.255.0
+!
+interface GigabitEthernet0/0/2.800
+ description [TELLABA-NORENTA]
+ bandwidth 81920
+ encapsulation dot1Q 800
+ ip address 10.51.14.2 255.255.255.252
+ ip flow monitor SEP_Netflow_Monitor input
+ ip flow monitor SEP_Netflow_Monitor output
+!
+interface GigabitEthernet0/0/2.801
+ description [TELLABA-NORENTA-BEIN-Ostani]
+ encapsulation dot1Q 801
+ ip address 172.17.18.42 255.255.255.252
+!
+interface GigabitEthernet0/0/2.3779
+ encapsulation dot1Q 3779
+ ip address 10.175.79.26 255.255.255.252
+!
+interface GigabitEthernet0/0/2.3801
+ description [MPLS-SHOAB-20M]
+ bandwidth 20480
+ encapsulation dot1Q 3801
+ ip address 172.24.14.2 255.255.255.252
+!
+interface GigabitEthernet0/0/2.3987
+ description [INTERNET]
+ encapsulation dot1Q 3987
+ ip address 172.16.73.50 255.255.255.252
+!
+interface GigabitEthernet0/0/3
+ description [MPLS]
+ ip address 10.175.20.226 255.255.255.252
+ media-type rj45
+ negotiation auto
+!
+interface GigabitEthernet0
+ vrf forwarding Mgmt-intf
+ no ip address
+ shutdown
+ negotiation auto
+!
+interface Vlan1
+ no ip address
+!
+!
+router eigrp 100
+ variance 2
+ network 10.51.14.0 0.0.0.255
+ network 10.51.114.0 0.0.0.255
+ network 172.16.14.1 0.0.0.0
+ network 192.168.14.0
+ network 192.168.114.0
+!
+!
+router eigrp SEPAH
+ !
+ address-family ipv4 unicast autonomous-system 510
+  !
+  af-interface default
+   authentication mode md5
+   authentication key-chain SEPAH-EIGRP-UNDERLAY
+  exit-af-interface
+  !
+  topology base
+   redistribute eigrp 502 route-map SERVICE-FILTER-ROUTES
+   offset-list NORONTA-SERVICES in 90000000 Tunnel0 
+  exit-af-topology
+  network 10.114.62.61 0.0.0.0
+  network 10.114.62.62 0.0.0.0
+  network 192.168.63.40 0.0.0.3
+  network 192.168.63.156 0.0.0.3
+  network 192.168.68.0 0.0.1.255
+ exit-address-family
+!
+!
+router eigrp SEPAH-SOUTH
+ !
+ address-family ipv4 unicast autonomous-system 502
+  !
+  af-interface default
+   authentication mode md5
+   authentication key-chain SEPAH-EIGRP-UNDERLAY
+  exit-af-interface
+  !
+  topology base
+   distribute-list route-map EIGRP-FILTER-ROUTES out 
+   redistribute eigrp 510
+   redistribute static route-map SEPAH-SARPARASTI-SERVICES
+  exit-af-topology
+  network 10.114.49.0 0.0.0.31
+  network 172.16.14.0 0.0.0.255
+  network 192.168.0.0 0.0.255.255
+ exit-address-family
+!
+router bgp 65510
+ bgp log-neighbor-changes
+!
+ip forward-protocol nd
+no ip http server
+no ip http secure-server
+ip tftp source-interface GigabitEthernet0
+ip route 10.0.3.0 255.255.255.0 Tunnel1 name Monitoring-Voip-TEHRAN
+ip route 10.2.0.0 255.255.0.0 Tunnel1 name VOIP-SETAD-TEHRAN
+ip route 10.2.3.0 255.255.255.0 Tunnel1 name VOIP-SETAD-TEHRAN
+ip route 10.51.14.0 255.255.255.0 10.51.14.1 name [Tellabs-NORENTA]
+ip route 10.51.114.0 255.255.255.0 10.51.14.1 name [Tellabs-NORENTA]
+ip route 10.51.140.0 255.255.255.0 10.51.14.1 name [Tellabs-NORENTA]
+ip route 10.51.141.0 255.255.255.0 10.51.14.1 name [Tellabs-NORENTA]
+ip route 10.51.142.0 255.255.255.0 10.51.14.1 name [Tellabs-NORENTA]
+ip route 10.78.22.0 255.255.255.0 Tunnel477 name ghavamin-1506207-2246129
+ip route 10.78.61.0 255.255.255.0 172.27.14.6 name [SEPAH-GHAVAMIN]
+ip route 10.78.64.0 255.255.255.0 Tunnel447 name BANK-KOSAR-1507236
+ip route 10.78.65.0 255.255.255.0 Tunnel448 name kosar-9902245506-1507237
+ip route 10.78.66.0 255.255.255.0 Tunnel449 name BANK-KOSAR-1507238
+ip route 10.78.67.0 255.255.255.0 Tunnel450 name BANK-KOSAR-1507239
+ip route 10.78.68.0 255.255.255.0 Tunnel451 name BANK-KOSAR-1507240
+ip route 10.78.70.0 255.255.255.0 Tunnel453 name BANK-KOSAR-1507242
+ip route 10.78.73.0 255.255.255.0 Tunnel456 name BANK-KOSAR-1507246
+ip route 10.78.74.0 255.255.255.0 Tunnel458 name kosar-9902245559-1507248
+ip route 10.78.97.0 255.255.255.0 Tunnel441 name hekmat-1508087-2229519
+ip route 10.78.98.0 255.255.255.0 Tunnel442 name hekmat-1508088-2229528
+ip route 10.78.99.0 255.255.255.0 Tunnel98 name 1508089-ADSL
+ip route 10.94.0.0 255.255.128.0 Tunnel502 name ANSAR-BRANCHES-FRS
+ip route 10.94.1.0 255.255.255.0 Tunnel555 name ansar-1503329-9802198915
+ip route 10.94.2.0 255.255.255.0 Tunnel548 name ansar-1503330-9802220057
+ip route 10.94.4.0 255.255.255.0 Tunnel552 name ansar-1503332-9902220058
+ip route 10.94.5.0 255.255.255.0 Tunnel544 name ansar-1503334-9802201047
+ip route 10.94.6.0 255.255.255.0 Tunnel517 name 1503864-ansar-9802201048
+ip route 10.94.7.0 255.255.255.0 Tunnel509 name ansar-1503336-9802198916
+ip route 10.94.8.0 255.255.255.0 Tunnel554 name ansar-1503337-9802199123
+ip route 10.94.9.0 255.255.255.0 Tunnel512 name ansar-1503338-9802201049
+ip route 10.94.10.0 255.255.255.0 Tunnel545 name ansar-1503339-9802201050
+ip route 10.94.12.0 255.255.255.0 Tunnel550 name ansar-1503341-9802199124
+ip route 10.94.13.0 255.255.255.0 Tunnel536 name ansar-1503342-9902244957
+ip route 10.94.14.0 255.255.255.0 Tunnel532 name ansar-1503344-32996
+ip route 10.94.15.0 255.255.255.0 Tunnel513 name ansar-15033345-9802201051
+ip route 10.94.16.0 255.255.255.0 Tunnel541 name ansar-1503346-9802199134
+ip route 10.94.17.0 255.255.255.0 Tunnel507 name ansar-1503347-32998
+ip route 10.94.18.0 255.255.255.0 Tunnel546 name ansar-1503348-9802202075
+ip route 10.94.19.0 255.255.255.0 Tunnel537 name ansar-1503349-9802198918
+ip route 10.94.20.0 255.255.255.0 Tunnel506 name 1505330
+ip route 10.94.21.0 255.255.255.0 Tunnel510 name ansar-1503351-9802198919
+ip route 10.94.22.0 255.255.255.0 Tunnel529 name ansar-1503352-9802198920
+ip route 10.94.23.0 255.255.255.0 Tunnel552 name ansar-1503354-9902220056
+ip route 10.94.24.0 255.255.255.0 Tunnel505 name ansar-1503355-355606
+ip route 10.94.26.0 255.255.255.0 Tunnel503 name ansar-1503357-500136
+ip route 10.94.27.0 255.255.255.0 Tunnel527 name ansar-1503358-9902220059
+ip route 10.94.28.0 255.255.255.0 Tunnel534 name ansar-1503359-9802198922
+ip route 10.94.29.0 255.255.255.0 Tunnel539 name ansar-1503327-9802198914
+ip route 10.94.32.0 255.255.255.0 Tunnel515 name ansar-1503792-9802202051
+ip route 10.94.34.0 255.255.255.0 Tunnel531 name ansar-1503809-9902220060
+ip route 10.94.35.0 255.255.255.0 Tunnel112 name 1503982-banihashem-MPLS
+ip route 10.94.37.0 255.255.255.0 Tunnel518 name ansar-1503742-9802202056
+ip route 10.94.38.0 255.255.255.0 Tunnel519 name ansar-1503870-9802202057
+ip route 10.94.39.0 255.255.255.0 Tunnel526 name ansar-1503852-9802202058
+ip route 10.94.41.0 255.255.255.0 Tunnel533 name ansar-1503999-9802202060
+ip route 10.94.42.0 255.255.255.0 Tunnel521 name ansar-1503684-9802202061
+ip route 10.94.43.0 255.255.255.0 Tunnel229 name [1503801-Tellabs-2M]
+ip route 10.94.43.0 255.255.255.0 Tunnel107 20 name [1503801-MPLS]
+ip route 10.94.45.0 255.255.255.0 Tunnel528 name ansar-1503817-9902220062
+ip route 10.94.47.0 255.255.255.0 Tunnel522 name ansar-1503824-9802202066
+ip route 10.94.49.0 255.255.255.0 Tunnel524 name ansar-1503862-9802202068
+ip route 10.94.50.0 255.255.255.0 Tunnel525 name ansar-1503795-98022020699
+ip route 10.94.53.0 255.255.255.0 Tunnel547 name ansar-1503991-9802202072
+ip route 10.94.56.0 255.255.255.0 Tunnel508 name ansar-1503316-9802198916
+ip route 10.94.57.0 255.255.255.0 Tunnel549 name ansar-1503318-9802198902
+ip route 10.94.58.0 255.255.255.0 Tunnel551 name ansar-1503319-9802201041
+ip route 10.94.59.0 255.255.255.0 Tunnel504 name ansar-1503320-212309
+ip route 10.94.60.0 255.255.255.0 Tunnel538 name ansar-1503321-9802198913
+ip route 10.94.61.0 255.255.255.0 Tunnel540 name ansar-1503322-9802199117
+ip route 10.94.63.0 255.255.255.0 Tunnel542 name ansar-15033326-9802201043
+ip route 10.94.64.0 255.255.255.0 Tunnel543 name ansar-1503328-9802201044
+ip route 10.94.65.0 255.255.255.0 Tunnel556 name ansar-1503317-40002305420
+ip route 10.94.66.0 255.255.255.0 Tunnel111 name 1503969-Aghaei-MPLS
+ip route 10.94.67.0 255.255.255.0 Tunnel502 name ansar-1503356-9802198921
+ip route 10.94.67.0 255.255.255.0 Tunnel110 name 1503356-bazarganan-MPLS
+ip route 10.94.68.0 255.255.255.0 Tunnel0
+ip route 10.94.69.0 255.255.255.0 Tunnel109 name ATM-1503349-Tip33AlmahdiB
+ip route 10.94.151.0 255.255.255.0 Tunnel399 name mehr-1505320-2276067
+ip route 10.94.154.0 255.255.255.0 Tunnel421
+ip route 10.94.159.0 255.255.255.0 Tunnel404 name mehr-1505330
+ip route 10.114.9.0 255.255.255.0 Tunnel158 name [0167-Tellabs-2M]
+ip route 10.114.16.0 255.255.255.0 Tunnel164 20 name [0406-Tellabs-2M]
+ip route 10.114.39.0 255.255.255.0 Tunnel191 name 0894-Tellabs-2M
+ip route 10.114.40.0 255.255.255.0 Tunnel192 20 name [0910-Tellabs-2M]
+ip route 10.114.42.0 255.255.255.0 Tunnel197 name [1091-Tellabs-2M]
+ip route 10.114.55.0 255.255.255.0 Tunnel214 name [1745-Tellabs-2M]
+ip route 10.114.92.0 255.255.255.0 Tunnel198
+ip route 10.114.97.0 255.255.255.0 Tunnel234 name [BJ-1474-ZahedShahr]
+ip route 10.114.104.0 255.255.255.0 Tunnel14 name [ATM-7303-2058]
+ip route 10.114.135.0 255.255.255.0 Tunnel6 name [ATM-0406-6096]
+ip route 10.114.137.0 255.255.255.0 Tunnel108 5 name ATM-1474-7304
+ip route 10.114.139.0 255.255.255.0 Tunnel105 name [ATM-1630-GAZ5]
+ip route 10.114.139.0 255.255.255.0 Tunnel233 20 name [BJ-2102-GasTransport]
+ip route 10.114.140.0 255.255.255.0 Tunnel0
+ip route 10.114.142.0 255.255.255.0 Tunnel0
+ip route 10.114.194.0 255.255.255.0 Tunnel502 name [SEPAH-ANSAR-25M]
+ip route 10.114.196.0 255.255.255.0 Tunnel600 name [SEPAH-SAMEN]
+ip route 10.114.240.0 255.255.255.0 Tunnel1 name voip
+ip route 10.114.248.0 255.255.255.0 172.16.14.249
+ip route 10.114.252.0 255.255.255.0 172.16.14.249
+ip route 10.114.252.200 255.255.255.255 172.16.14.249
+ip route 10.114.253.0 255.255.255.0 Tunnel399 name [SEPAH-MEHR-Tellabs-Norenta]
+ip route 10.191.0.0 255.255.0.0 10.191.13.201
+ip route 111.111.111.111 255.255.255.255 Null0
+ip route 172.16.45.102 255.255.255.255 Tunnel0 70
+ip route 172.16.45.102 255.255.255.255 Tunnel1 80
+ip route 172.16.50.10 255.255.255.255 Tunnel0 70
+ip route 172.16.50.10 255.255.255.255 Tunnel1 80
+ip route 172.16.70.10 255.255.255.255 Tunnel0 70
+ip route 172.16.70.10 255.255.255.255 Tunnel1 80
+ip route 172.16.100.7 255.255.255.255 Tunnel0 70
+ip route 172.16.100.7 255.255.255.255 Tunnel1 80
+ip route 172.16.157.79 255.255.255.255 Tunnel0 70
+ip route 172.16.157.79 255.255.255.255 Tunnel1 80
+ip route 172.16.162.156 255.255.255.255 Tunnel0 70
+ip route 172.16.162.156 255.255.255.255 Tunnel1 80
+ip route 172.16.210.1 255.255.255.255 Tunnel1 50
+ip route 172.16.210.1 255.255.255.255 Tunnel0 60
+ip route 172.16.210.136 255.255.255.255 Tunnel0 50
+ip route 172.16.210.136 255.255.255.255 Tunnel1 60
+ip route 172.16.210.163 255.255.255.255 Tunnel1 50
+ip route 172.16.210.163 255.255.255.255 Tunnel0 60
+ip route 172.16.211.2 255.255.255.255 Tunnel1 50
+ip route 172.16.211.2 255.255.255.255 Tunnel0 60
+ip route 172.16.211.19 255.255.255.255 Tunnel1 50
+ip route 172.16.211.19 255.255.255.255 Tunnel0 60
+ip route 172.16.211.58 255.255.255.255 Tunnel1 50
+ip route 172.16.211.58 255.255.255.255 Tunnel0 60
+ip route 172.16.211.161 255.255.255.255 Tunnel1 name [PADOVISH]
+ip route 172.16.211.179 255.255.255.255 Tunnel1 50
+ip route 172.16.211.179 255.255.255.255 Tunnel0 60
+ip route 172.16.212.55 255.255.255.255 Tunnel0 50
+ip route 172.16.212.55 255.255.255.255 Tunnel1 60
+ip route 172.16.212.65 255.255.255.255 Tunnel1 50
+ip route 172.16.212.65 255.255.255.255 Tunnel0 60
+ip route 172.16.212.66 255.255.255.255 Tunnel1 50
+ip route 172.16.212.66 255.255.255.255 Tunnel0 60
+ip route 172.16.212.89 255.255.255.255 Tunnel1 50
+ip route 172.16.212.89 255.255.255.255 Tunnel0 60
+ip route 172.16.212.90 255.255.255.255 Tunnel0 50
+ip route 172.16.212.90 255.255.255.255 Tunnel1 60
+ip route 172.16.212.97 255.255.255.255 Tunnel1 50
+ip route 172.16.212.97 255.255.255.255 Tunnel0 60
+ip route 172.16.212.110 255.255.255.255 Tunnel1 50
+ip route 172.16.212.110 255.255.255.255 Tunnel0 60
+ip route 172.16.212.115 255.255.255.255 Tunnel1 50
+ip route 172.16.212.115 255.255.255.255 Tunnel0 60
+ip route 172.16.212.116 255.255.255.255 Tunnel1 50
+ip route 172.16.212.116 255.255.255.255 Tunnel0 60
+ip route 172.16.212.119 255.255.255.255 Tunnel1 50
+ip route 172.16.212.119 255.255.255.255 Tunnel0 60
+ip route 172.16.212.141 255.255.255.255 Tunnel0 50
+ip route 172.16.212.141 255.255.255.255 Tunnel1 60
+ip route 172.16.212.206 255.255.255.255 Tunnel1 50
+ip route 172.16.212.206 255.255.255.255 Tunnel0 60
+ip route 172.16.212.207 255.255.255.255 Tunnel1 50
+ip route 172.16.212.207 255.255.255.255 Tunnel0 60
+ip route 172.16.212.210 255.255.255.255 Tunnel1 50
+ip route 172.16.212.210 255.255.255.255 Tunnel0 60
+ip route 172.16.212.225 255.255.255.255 Tunnel0 50
+ip route 172.16.212.225 255.255.255.255 Tunnel1 60
+ip route 172.16.212.227 255.255.255.255 Tunnel1 50
+ip route 172.16.212.227 255.255.255.255 Tunnel0 60
+ip route 172.16.213.25 255.255.255.255 Tunnel1 50
+ip route 172.16.213.25 255.255.255.255 Tunnel0 60
+ip route 172.16.213.32 255.255.255.255 Tunnel0 50
+ip route 172.16.213.32 255.255.255.255 Tunnel1 60
+ip route 172.16.213.51 255.255.255.255 Tunnel0 50
+ip route 172.16.213.51 255.255.255.255 Tunnel1 60
+ip route 172.16.213.57 255.255.255.255 Tunnel0 50
+ip route 172.16.213.57 255.255.255.255 Tunnel1 60
+ip route 172.16.218.0 255.255.255.0 Tunnel1
+ip route 172.16.219.115 255.255.255.255 Tunnel0 70
+ip route 172.16.219.115 255.255.255.255 Tunnel1 80
+ip route 172.16.224.240 255.255.255.255 Tunnel1 80 name ATM-Site
+ip route 172.16.230.43 255.255.255.255 Tunnel0 50 name kabipoor-omidnet
+ip route 172.16.230.43 255.255.255.255 Tunnel1 60 name kabipoor-omidnet
+ip route 172.16.230.101 255.255.255.255 Tunnel0 50 name kafaee-omidnet
+ip route 172.16.230.101 255.255.255.255 Tunnel1 60 name kafaee-omidnet
+ip route 172.16.230.102 255.255.255.255 Tunnel0 50 name dastbaz-omidnet
+ip route 172.16.230.102 255.255.255.255 Tunnel1 60 name dastbaz-omidnet
+ip route 172.16.231.0 255.255.255.0 Tunnel0 70 name Edaraeh_Amaliyat_tehran
+ip route 172.16.231.0 255.255.255.0 Tunnel1 80 name Edaraeh_Amaliyat_tehran
+ip route 172.16.231.106 255.255.255.255 Tunnel0 name ATM-Site
+ip route 172.16.231.106 255.255.255.255 Tunnel1 80 name ATM-Site
+ip route 172.16.231.161 255.255.255.255 Tunnel0 name ATM-Site
+ip route 172.16.231.161 255.255.255.255 Tunnel1 80 name ATM-Site
+ip route 172.16.231.162 255.255.255.255 Tunnel0 name ATM-Site
+ip route 172.16.231.162 255.255.255.255 Tunnel1 80 name ATM-Site
+ip route 172.16.231.163 255.255.255.255 Tunnel0 name ATM-Site
+ip route 172.16.231.163 255.255.255.255 Tunnel1 80 name ATM-Site
+ip route 172.16.231.164 255.255.255.255 Tunnel0 name ATM-Site
+ip route 172.16.231.164 255.255.255.255 Tunnel1 80 name ATM-Site
+ip route 172.16.231.165 255.255.255.255 Tunnel0 name ATM-Site
+ip route 172.16.231.165 255.255.255.255 Tunnel1 80 name ATM-Site
+ip route 172.16.231.166 255.255.255.255 Tunnel0 name ATM-Site
+ip route 172.16.231.166 255.255.255.255 Tunnel1 80 name ATM-Site
+ip route 172.16.231.167 255.255.255.255 Tunnel0 name ATM-Site
+ip route 172.16.231.167 255.255.255.255 Tunnel1 80 name ATM-Site
+ip route 172.16.231.168 255.255.255.255 Tunnel0 name ATM-Site
+ip route 172.16.231.168 255.255.255.255 Tunnel1 80 name ATM-Site
+ip route 172.16.231.169 255.255.255.255 Tunnel0 name ATM-Site
+ip route 172.16.231.169 255.255.255.255 Tunnel1 80 name ATM-Site
+ip route 172.16.231.170 255.255.255.255 Tunnel0 name ATM-Site
+ip route 172.16.231.170 255.255.255.255 Tunnel1 80 name ATM-Site
+ip route 172.16.231.171 255.255.255.255 Tunnel0 name ATM-Site
+ip route 172.16.231.171 255.255.255.255 Tunnel1 80 name ATM-Site
+ip route 172.16.231.177 255.255.255.255 Tunnel0 name ATM-Site
+ip route 172.16.231.177 255.255.255.255 Tunnel1 80 name ATM-Site
+ip route 172.16.237.151 255.255.255.255 Tunnel1 70 name pc-rafi
+ip route 172.16.237.176 255.255.255.255 Tunnel1 80 name pc-sed-alikhani
+ip route 172.16.237.200 255.255.255.255 Tunnel0 60 name server-sed-alikhani
+ip route 172.16.237.200 255.255.255.255 Tunnel1 70 name server-sed-alikhani
+ip route 172.16.237.201 255.255.255.255 Tunnel1 80 name server-sed-alikhani
+ip route 172.17.3.105 255.255.255.255 Tunnel0 50
+ip route 172.17.3.105 255.255.255.255 Tunnel1 60
+ip route 172.17.15.4 255.255.255.252 10.175.20.225 name [MPLS]
+ip route 172.17.17.0 255.255.255.252 10.175.20.225 name [DMVPN-OMID]
+ip route 172.17.18.0 255.255.255.252 172.17.18.41
+ip route 172.17.76.155 255.255.255.255 Tunnel0 70
+ip route 172.17.76.155 255.255.255.255 Tunnel1 80
+ip route 172.17.150.232 255.255.255.255 Tunnel0 70
+ip route 172.17.150.232 255.255.255.255 Tunnel1 80
+ip route 172.17.178.128 255.255.255.255 Tunnel0 50
+ip route 172.17.178.128 255.255.255.255 Tunnel1 60
+ip route 172.18.0.0 255.255.0.0 Tunnel1 name voip
+ip route 172.18.0.0 255.255.128.0 Tunnel1
+ip route 172.18.14.0 255.255.255.0 172.16.14.249
+ip route 172.18.56.77 255.255.255.255 Tunnel0 70
+ip route 172.18.56.77 255.255.255.255 Tunnel1 80
+ip route 172.18.85.118 255.255.255.255 Tunnel0 70
+ip route 172.18.85.118 255.255.255.255 Tunnel1 80
+ip route 172.18.217.38 255.255.255.255 Tunnel0 70
+ip route 172.18.217.38 255.255.255.255 Tunnel1 80
+ip route 172.20.13.59 255.255.255.255 Tunnel0 70
+ip route 172.20.13.59 255.255.255.255 Tunnel1 80
+ip route 172.20.117.144 255.255.255.255 Tunnel0 70
+ip route 172.20.117.144 255.255.255.255 Tunnel1 80
+ip route 172.20.138.17 255.255.255.255 Tunnel0 70
+ip route 172.20.138.17 255.255.255.255 Tunnel1 80
+ip route 172.20.173.208 255.255.255.255 Tunnel0 70
+ip route 172.20.173.208 255.255.255.255 Tunnel1 80
+ip route 172.21.5.0 255.255.255.0 Tunnel0
+ip route 172.21.7.0 255.255.255.0 Tunnel0
+ip route 172.21.220.39 255.255.255.255 Tunnel0 70
+ip route 172.21.220.39 255.255.255.255 Tunnel1 80
+ip route 172.21.228.174 255.255.255.255 Tunnel0 70
+ip route 172.21.228.174 255.255.255.255 Tunnel1 80
+ip route 172.23.32.134 255.255.255.255 Tunnel0 70
+ip route 172.23.32.134 255.255.255.255 Tunnel1 80
+ip route 172.23.133.243 255.255.255.255 Tunnel0 70
+ip route 172.23.133.243 255.255.255.255 Tunnel1 80
+ip route 172.24.14.0 255.255.255.0 172.24.14.1 name [Network-WAN]
+ip route 172.24.42.172 255.255.255.255 Tunnel0 70
+ip route 172.24.42.172 255.255.255.255 Tunnel1 80
+ip route 172.24.98.211 255.255.255.255 Tunnel0 70
+ip route 172.24.98.211 255.255.255.255 Tunnel1 80
+ip route 172.24.114.0 255.255.255.0 172.24.14.1 name [Network-WAN]
+ip route 172.24.214.0 255.255.255.0 172.24.14.1 name [Network-WAN]
+ip route 172.26.81.221 255.255.255.255 Tunnel0 70
+ip route 172.26.81.221 255.255.255.255 Tunnel1 80
+ip route 172.27.12.208 255.255.255.255 Tunnel0 70
+ip route 172.27.12.208 255.255.255.255 Tunnel1 80
+ip route 172.27.14.0 255.255.255.0 172.27.14.6
+ip route 172.27.129.78 255.255.255.255 Tunnel0 70
+ip route 172.27.129.78 255.255.255.255 Tunnel1 80
+ip route 172.27.138.33 255.255.255.255 Tunnel0 70
+ip route 172.27.138.33 255.255.255.255 Tunnel1 80
+ip route 172.29.147.184 255.255.255.255 Tunnel0 70
+ip route 172.29.147.184 255.255.255.255 Tunnel1 80
+ip route 172.29.176.201 255.255.255.255 Tunnel0 70
+ip route 172.29.176.201 255.255.255.255 Tunnel1 80
+ip route 172.29.201.4 255.255.255.255 Tunnel0 70
+ip route 172.29.201.4 255.255.255.255 Tunnel1 80
+ip route 172.30.53.15 255.255.255.255 Tunnel0 70
+ip route 172.30.53.15 255.255.255.255 Tunnel1 80
+ip route 172.30.71.0 255.255.255.0 172.24.8.1
+ip route 172.30.205.97 255.255.255.255 Tunnel0 70
+ip route 172.30.205.97 255.255.255.255 Tunnel1 80
+ip route 172.31.82.132 255.255.255.255 Tunnel0 70
+ip route 172.31.82.132 255.255.255.255 Tunnel1 80
+ip route 172.31.102.185 255.255.255.255 Tunnel0 70
+ip route 172.31.102.185 255.255.255.255 Tunnel1 80
+ip route 172.31.219.112 255.255.255.255 Tunnel0 70
+ip route 172.31.219.112 255.255.255.255 Tunnel1 80
+ip route 192.168.80.1 255.255.255.255 Tunnel0
+ip route 192.168.80.1 255.255.255.255 Tunnel1 20
+ip route 192.168.110.0 255.255.255.0 Tunnel0
+ip route 192.168.110.0 255.255.255.0 Tunnel1 20
+ip route 192.168.140.0 255.255.255.0 Tunnel0
+ip route 192.168.140.0 255.255.255.0 Tunnel1 20
+ip route 192.168.200.0 255.255.255.0 172.16.14.10
+ip route 192.168.200.10 255.255.255.255 Tunnel0 70
+ip route 192.168.200.10 255.255.255.255 Tunnel1 80
+ip route 192.168.200.104 255.255.255.255 Tunnel0 70
+ip route 192.168.200.104 255.255.255.255 Tunnel1 80
+ip route 192.168.200.105 255.255.255.255 Tunnel0 70
+ip route 192.168.200.105 255.255.255.255 Tunnel1 80
+ip route 192.168.210.0 255.255.255.0 172.16.14.10
+ip tacacs source-interface GigabitEthernet0/0/1
+ip ssh version 2
+!
+!
+ip access-list standard NORONTA-SERVICES
+ permit 10.161.65.13
+ permit 10.180.0.0 0.0.255.255
+ permit 10.160.0.0 0.0.255.255
+!
+!
+ip prefix-list BANK-MARKAZI seq 1 permit 192.168.65.0/24
+ip prefix-list BANK-MARKAZI seq 2 permit 192.168.65.110/32
+ip prefix-list BANK-MARKAZI seq 3 permit 192.168.65.115/32
+ip prefix-list BANK-MARKAZI seq 4 permit 192.168.65.116/32
+ip prefix-list BANK-MARKAZI seq 5 permit 192.168.65.225/32
+ip prefix-list BANK-MARKAZI seq 6 permit 192.168.65.227/32
+ip prefix-list BANK-MARKAZI seq 7 permit 192.168.65.65/32
+ip prefix-list BANK-MARKAZI seq 8 permit 192.168.65.66/32
+!
+ip prefix-list CORE-LOOPBACK-ZHRF seq 5 permit 10.161.65.15/32
+!
+ip prefix-list CORE_LOOPBACK_MPLS seq 5 permit 10.161.65.14/32
+!
+ip prefix-list CORE_LOOPBACK_TDM seq 5 permit 10.161.65.13/32
+!
+ip prefix-list DOTIN seq 1 permit 192.168.11.0/24
+!
+ip prefix-list ERP-TEST seq 1 permit 192.168.11.118/32
+!
+ip prefix-list SABOOS seq 1 permit 192.168.11.0/24
+!
+ip prefix-list SEPAH-SARPARASTI-SERVICES seq 1 permit 10.114.252.0/24
+ip prefix-list SEPAH-SARPARASTI-SERVICES seq 2 permit 10.114.62.62/32
+ip prefix-list SEPAH-SARPARASTI-SERVICES seq 3 permit 10.114.62.61/32
+ip prefix-list SEPAH-SARPARASTI-SERVICES seq 4 permit 172.16.14.0/24
+ip prefix-list SEPAH-SARPARASTI-SERVICES seq 7 permit 10.114.194.0/24
+ip prefix-list SEPAH-SARPARASTI-SERVICES seq 8 permit 10.114.196.0/24
+ip prefix-list SEPAH-SARPARASTI-SERVICES seq 9 permit 10.181.1.253/32
+ip prefix-list SEPAH-SARPARASTI-SERVICES seq 15 permit 10.114.253.0/24
+!
+ip prefix-list SETAK seq 1 permit 192.168.11.51/32
+!
+ip prefix-list TEMGT seq 5 permit 185.143.234.120/32
+kron occurrence backup at 3:30 Mon recurring
+ policy-list backup
+!
+logging trap warnings
+logging source-interface GigabitEthernet0/0/1
+logging host 172.16.213.19
+logging host 10.160.252.150 transport udp port 1514
+access-list 40 remark [EIGRP-ZHRF-SELECTION]
+access-list 40 permit 10.161.65.15
+access-list 126 permit tcp any host 128.212.250.85
+access-list 126 permit tcp any host 128.212.245.25
+access-list 126 permit gre any any
+access-list 126 deny   ip any any log
+access-list 130 deny   tcp 192.168.11.0 0.0.0.255 any gt 0 log
+access-list 130 permit udp any any gt 0 log
+access-list 130 permit tcp any any
+access-list 130 permit eigrp any any
+access-list 130 permit gre any any
+access-list 130 permit tcp any any gt 0 log
+access-list 130 permit icmp any any log
+access-list 130 permit udp any any
+access-list 150 deny   icmp 10.114.0.0 0.0.255.255 host 172.16.14.1
+access-list 150 deny   icmp 192.168.0.0 0.0.255.255 host 172.16.14.1
+access-list 150 permit eigrp any any
+access-list 150 permit gre any any
+access-list 150 permit tcp any any
+access-list 150 permit icmp any any
+access-list 150 permit udp any any
+access-list 2000 deny   udp any any eq rip
+access-list 2000 permit eigrp any any
+access-list 2000 permit ip any any
+access-list 2000 deny   tcp any eq 7780 any
+access-list 2010 deny   ip host 128.212.249.16 any
+access-list 2030 deny   ip 172.16.206.0 0.0.0.255 any
+!
+route-map EIGRP-FILTER-ROUTES permit 10
+ match ip address prefix-list CORE_LOOPBACK_MPLS
+!
+route-map EIGRP-FILTER-ROUTES permit 20
+ match ip address prefix-list CORE_LOOPBACK_TDM
+!
+route-map EIGRP-FILTER-ROUTES permit 30
+ match ip address prefix-list SEPAH-SARPARASTI-SERVICES
+!
+route-map EIGRP-FILTER-ROUTES permit 40
+ match ip address prefix-list CORE-LOOPBACK-ZHRF
+!
+route-map EIGRP-FILTER-ROUTES deny 100
+!
+route-map SEPAH-SARPARASTI-SERVICES permit 10
+ match ip address prefix-list SEPAH-SARPARASTI-SERVICES
+!
+route-map SERVICE-FILTER-ROUTES deny 10
+ match ip address prefix-list BANK-MARKAZI
+!
+route-map SERVICE-FILTER-ROUTES deny 20
+ match ip address prefix-list DOTIN
+!
+route-map SERVICE-FILTER-ROUTES deny 30
+ match ip address prefix-list SABOOS
+!
+route-map SERVICE-FILTER-ROUTES deny 40
+ match ip address prefix-list SETAK
+!
+route-map SERVICE-FILTER-ROUTES deny 50
+ match ip address prefix-list ERP-TEST
+!
+route-map SERVICE-FILTER-ROUTES permit 60
+!
+snmp-server group Sbank v3 auth 
+snmp-server group Sbank v3 priv read Monitoring 
+snmp-server group admin v3 auth 
+snmp-server group sepah-ict v3 auth read sepah-read 
+snmp-server group sepah-user v3 auth 
+snmp-server view Monitoring iso included
+snmp-server view sepah-read iso included
+snmp-server community ictmonitor RO
+snmp-server community ict408 RO
+snmp-server community bina RO
+snmp-server community pilotd@n@ RO
+snmp-server host 10.100.4.67 version 3 auth admin 
+snmp-server host 10.100.9.34 version 2c pilotd@n@ 
+snmp-server host 10.100.9.37 version 2c pilotd@n@ 
+snmp-server host 10.100.9.40 version 2c pilotd@n@ 
+snmp-server host 10.162.170.10 version 2c pilotd@n@ 
+snmp-server host 10.162.170.2 version 2c pilotd@n@ 
+snmp-server host 10.162.170.26 version 2c pilotd@n@ 
+snmp-server host 10.162.170.27 version 2c pilotd@n@ 
+snmp-server host 10.100.4.84 version 3 auth sepah-user 
+!
+tacacs-server host 10.100.4.90
+tacacs-server host 10.100.4.91
+tacacs-server timeout 2
+tacacs-server key 7 101D19390D5A1E57091D
+tacacs server ISE-3
+ key 7 124A15371A4600582F32
+tacacs server ISE-4
+ address ipv4 10.180.12.12
+ key 7 13560732034108762E3D
+!
+!
+!
+control-plane
+!
+banner login ^C
+##########################################################################
+#                                                                        #
+#       ____  _____ ____   _    _   _    ____    _    _   _ _  __        #
+#      / ___|| ____|  _ \ / \  | | | |  | __ )  / \  | \ | | |/ /        #
+#      \___ \|  _| | |_) / _ \ | |_| |  |  _ \ / _ \ |  \| | ' /         #
+#       ___) | |___|  __/ ___ \|  _  |  | |_) / ___ \| |\  | . \         #
+#      |____/|_____|_| /_/   \_\_| |_|  |____/_/   \_\_| \_|_|\_\        #
+#                                                                        #
+#                                                                        #
+#      -----------------------------------------------------------       #
+#                  UNAUTHORIZED ACCESS IS PROHIBITED                     #
+#      -----------------------------------------------------------       #
+#                                                                        #
+#                                                                        #
+#   You must have explicit authorized permission to access this device   #
+#    All activities performed on this device are logged and monitored    #
+#                                                                        #
+#                                                                        #
+##########################################################################
+^C
+!
+line con 0
+ logging synchronous
+ stopbits 1
+line aux 0
+ stopbits 1
+line vty 0 4
+ authorization commands 0 AAA
+ authorization commands 1 AAA
+ authorization commands 7 AAA
+ authorization commands 15 AAA
+ authorization exec AAA
+ logging synchronous
+ login authentication AAA
+ transport input ssh
+line vty 5 15
+ authorization commands 0 AAA
+ authorization commands 1 AAA
+ authorization commands 7 AAA
+ authorization commands 15 AAA
+ authorization exec AAA
+ logging synchronous
+ login authentication AAA
+ transport input ssh
+!
+ntp server 172.16.212.90
+!
+end

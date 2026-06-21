@@ -1,0 +1,239 @@
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+security passwords min-length 12
+
+hostname KHR-Wbr1507205-R
+
+no ip source-route
+no ip bootp server
+no ip domain lookup
+ip cef
+no ipv6 cef
+
+login block-for 120 attempts 3 within 60
+
+ip domain name Sepah.local
+ip ssh version 2
+ip ssh time-out 60
+ip ssh authentication-retries 2
+
+enable secret 5 <REDACTED>
+
+username spbnk privilege 15 secret <REDACTED>
+
+aaa new-model
+
+aaa authentication login default group ISE_TACACS local
+aaa authentication enable default group ISE_TACACS enable
+aaa authorization exec default group ISE_TACACS local
+aaa authorization commands 1 default group ISE_TACACS local
+aaa authorization commands 15 default group ISE_TACACS local
+aaa accounting exec default start-stop group ISE_TACACS
+aaa accounting commands 1 start-stop group ISE_TACACS
+aaa accounting commands 15 start-stop group ISE_TACACS
+aaa session-id common
+
+tacacs-server timeout 3
+tacacs-server directed-request
+
+tacacs server ISE-3
+ address ipv4 10.100.4.90
+ key <REDACTED>
+
+tacacs server ISE-4
+ address ipv4 10.180.12.12
+ key <REDACTED>
+
+crypto isakmp policy 110
+ encr aes 256
+ hash sha256
+ authentication pre-share
+ group 14
+ lifetime 86400
+
+crypto isakmp key <REDACTED> address 10.191.0.2
+crypto isakmp key <REDACTED> address 10.191.0.12
+crypto isakmp key <REDACTED> address 10.161.65.13
+crypto isakmp key <REDACTED> address 10.161.65.14
+
+crypto ipsec transform-set SEP-TR-IPSEC esp-aes 256 esp-sha256-hmac
+ mode tunnel
+
+crypto ipsec profile SEP-PR-IPSEC
+ set transform-set SEP-TR-IPSEC
+
+ip access-list standard SNMP
+ permit 10.100.4.67
+ permit 10.100.4.93
+ deny any log
+
+ip access-list standard VTY-ACCESS
+ permit 10.191.160.2
+ permit 192.168.5.34
+ permit 10.51.254.1
+ deny any log
+
+snmp-server view Monitoring iso included
+snmp-server group Sbank v3 priv read Monitoring access SNMP
+snmp-server host 10.100.4.67 version 3 priv Sphmon
+snmp-server host 10.100.4.93 version 3 priv Sphmon
+
+no snmp-server community public
+no snmp-server community private
+
+ntp server 172.16.212.90 prefer
+ntp authenticate
+ntp trusted-key 1
+
+no ip http server
+no ip http secure-server
+
+interface Loopback10
+ description Routing-EIGRP-TDM
+ ip address 10.80.77.1 255.255.255.255
+
+interface Tunnel4
+ bandwidth 1024
+ ip address 192.168.84.10 255.255.255.252
+ ip mtu 1460
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 10.51.82.10
+ tunnel destination 10.51.8.2
+
+interface Tunnel15
+ description MOBIN_NET
+ ip address 192.168.133.202 255.255.255.252
+ keepalive 5 4
+ tunnel source 10.191.165.146
+ tunnel destination 10.191.0.2
+
+interface Tunnel9010
+ description DMVPN-FOR-TDM
+ bandwidth 1024
+ ip address 192.168.229.241 255.255.224.0
+ no ip redirects
+ ip mtu 1400
+ ip nhrp authentication <REDACTED>
+ ip nhrp map 192.168.224.1 10.161.65.13
+ ip nhrp map multicast 10.161.65.13
+ ip nhrp map 192.168.224.3 10.181.1.253
+ ip nhrp map multicast 10.181.1.253
+ ip nhrp network-id 101
+ ip nhrp nhs 192.168.224.1
+ ip nhrp nhs 192.168.224.3
+ ip tcp adjust-mss 1360
+ tunnel source Loopback10
+ tunnel mode gre multipoint
+ tunnel key 101
+
+interface Tunnel9030
+ description DMVPN-MOBINNET
+ bandwidth 2048
+ ip address 192.168.165.241 255.255.224.0
+ no ip redirects
+ ip mtu 1400
+ ip nhrp authentication <REDACTED>
+ ip nhrp map 192.168.160.1 10.191.0.2
+ ip nhrp map multicast 10.191.0.2
+ ip nhrp map 192.168.160.3 10.191.0.12
+ ip nhrp map multicast 10.191.0.12
+ ip nhrp network-id 303
+ ip nhrp nhs 192.168.160.1
+ ip nhrp nhs 192.168.160.3
+ ip tcp adjust-mss 1360
+ tunnel source 10.191.165.146
+ tunnel mode gre multipoint
+ tunnel key 303
+
+interface GigabitEthernet0/0
+ description LAN
+ no ip address
+ no ip proxy-arp
+ no cdp enable
+ duplex auto
+ speed auto
+
+interface GigabitEthernet0/0.6
+ encapsulation dot1Q 6
+ ip address 10.80.68.1 255.255.255.0
+ no ip proxy-arp
+
+interface GigabitEthernet0/1
+ description WAN
+ ip address 10.191.165.146 255.255.255.252
+ no ip proxy-arp
+ no cdp enable
+
+interface GigabitEthernet0/2
+ shutdown
+
+interface Serial0/0/0
+ description PTMP
+ ip address 10.51.254.50 255.255.255.252
+ encapsulation ppp
+
+interface Serial0/1/1
+ description WAN
+ ip address 10.51.82.10 255.255.255.252
+ encapsulation ppp
+
+router eigrp 1
+ network 10.10.240.0 0.0.1.255
+ network 10.51.253.0 0.0.0.255
+ network 10.80.68.0 0.0.0.255
+ passive-interface default
+ no passive-interface Serial0/0/0
+ no passive-interface Serial0/1/1
+ eigrp stub connected
+
+router eigrp SEPAH-EAST
+ address-family ipv4 unicast autonomous-system 503
+  af-interface Tunnel4
+   authentication mode md5
+   authentication key-chain SEPAH-EIGRP-UNDERLAY
+  exit-af-interface
+  topology base
+  exit-af-topology
+  network 10.80.68.0 0.0.0.255
+  network 10.80.77.0 0.0.0.255
+  network 192.168.84.8 0.0.0.3
+  eigrp stub connected
+ exit-address-family
+
+router bgp 65510
+ bgp log-neighbor-changes
+ neighbor 192.168.160.1 remote-as 65500
+ neighbor 192.168.160.1 update-source Tunnel9030
+ neighbor 192.168.160.3 remote-as 65500
+ neighbor 192.168.160.3 update-source Tunnel9030
+ neighbor 192.168.224.1 remote-as 65500
+ neighbor 192.168.224.1 update-source Tunnel9010
+ neighbor 192.168.224.3 remote-as 65500
+ neighbor 192.168.224.3 update-source Tunnel9010
+ !
+ address-family ipv4
+  network 10.80.68.0 mask 255.255.255.0
+  neighbor 192.168.160.1 activate
+  neighbor 192.168.160.3 activate
+  neighbor 192.168.224.1 activate
+  neighbor 192.168.224.3 activate
+ exit-address-family
+
+ip route 0.0.0.0 0.0.0.0 Serial0/0/0
+ip route 10.80.68.0 255.255.255.0 Null0
+
+line con 0
+ exec-timeout 10 0
+ logging synchronous
+
+line vty 0 15
+ access-class VTY-ACCESS in
+ exec-timeout 10 0
+ transport input ssh
+
+banner login ^
+UNAUTHORIZED ACCESS PROHIBITED
+ALL ACTIVITY IS MONITORED
+^

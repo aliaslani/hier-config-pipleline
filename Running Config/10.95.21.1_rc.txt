@@ -1,0 +1,188 @@
+Building configuration...
+
+Current configuration : 5471 bytes
+!
+version 12.4
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+!
+hostname baje_padafand
+!
+boot-start-marker
+boot-end-marker
+!
+logging message-counter syslog
+enable secret 5 $1$MI92$idUxSFaREiyvjz4gQIHA/0
+!
+aaa new-model
+!
+!
+aaa group server tacacs+ ISE_TACACS
+ ip tacacs source-interface FastEthernet0/0.2
+!
+aaa authentication login default group ISE_TACACS local
+aaa authentication enable default group ISE_TACACS enable
+aaa authorization console
+aaa authorization config-commands
+aaa authorization exec default group ISE_TACACS local 
+aaa authorization commands 1 default group ISE_TACACS local 
+aaa authorization commands 15 default group ISE_TACACS local 
+aaa accounting exec default
+ action-type start-stop
+ group ISE_TACACS
+!
+aaa accounting commands 1 default
+ action-type start-stop
+ group ISE_TACACS
+!
+aaa accounting commands 15 default
+ action-type start-stop
+ group ISE_TACACS
+!
+!
+!
+aaa session-id common
+dot11 syslog
+ip source-route
+!
+!
+!
+!
+ip cef
+no ip domain lookup
+ip domain name Sepah.local
+no ipv6 cef
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+username admin privilege 15 secret 5 $1$ef25$L95/7z8eaS1XT4URNJXvJ.
+username miror privilege 15 secret 5 $1$vwbM$w8A3kahzDZnhz6hkAi7na0
+archive
+ log config
+  hidekeys
+! 
+!
+!
+!
+!
+controller DSL 0/0/0
+!
+ip ssh version 2
+!
+!
+!
+interface Tunnel0
+ description ADSL
+ ip address 192.168.29.158 255.255.255.252
+ ip mtu 1500
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 172.24.29.174
+ tunnel destination 172.24.29.2
+!
+interface FastEthernet0/0
+ no ip address
+ duplex auto
+ speed auto
+!
+interface FastEthernet0/0.2
+ encapsulation dot1Q 2
+ ip address 10.95.21.1 255.255.255.240
+!
+interface FastEthernet0/0.3
+ encapsulation dot1Q 3
+ ip address 10.95.21.17 255.255.255.240
+!
+interface FastEthernet0/0.4
+ encapsulation dot1Q 4
+ ip address 10.95.21.33 255.255.255.240
+!
+interface FastEthernet0/0.5
+ encapsulation dot1Q 5
+ ip address 10.95.21.49 255.255.255.240
+!
+interface FastEthernet0/0.6
+ encapsulation dot1Q 6
+ ip address 10.95.21.65 255.255.255.192
+!
+interface FastEthernet0/1
+ ip address 172.24.29.174 255.255.255.252
+ duplex auto
+ speed auto
+!
+ip forward-protocol nd
+ip route 0.0.0.0 0.0.0.0 Tunnel0 name [ADSL]
+ip route 10.95.2.0 255.255.255.0 Tunnel0
+ip route 172.24.29.0 255.255.255.0 172.24.29.173 name [ADSL]
+no ip http server
+no ip http secure-server
+!
+!
+!
+!
+!
+!
+!
+!
+!
+control-plane
+!
+!
+banner login ^C
+##########################################################################
+#                                                                        #
+#       ____  _____ ____   _    _   _    ____    _    _   _ _  __        #
+#      / ___|| ____|  _ \ / \  | | | |  | __ )  / \  | \ | | |/ /        #
+#      \___ \|  _| | |_) / _ \ | |_| |  |  _ \ / _ \ |  \| | ' /         #
+#       ___) | |___|  __/ ___ \|  _  |  | |_) / ___ \| |\  | . \         #
+#      |____/|_____|_| /_/   \_\_| |_|  |____/_/   \_\_| \_|_|\_\        #
+#                                                                        #
+#                                                                        #
+#      -----------------------------------------------------------       #
+#                  UNAUTHORIZED ACCESS IS PROHIBITED                     #
+#      -----------------------------------------------------------       #
+#                                                                        #
+#                                                                        #
+#   You must have explicit authorized permission to access this device   #
+#    All activities performed on this device are logged and monitored    #
+#                                                                        #
+#                                                                        #
+##########################################################################
+^C
+banner motd ^C 
+##########################################################################
+#                                                                        #
+#       ____  _____ ____   _    _   _    ____    _    _   _ _  __        #
+#      / ___|| ____|  _ \ / \  | | | |  | __ )  / \  | \ | | |/ /        #
+#      \___ \|  _| | |_) / _ \ | |_| |  |  _ \ / _ \ |  \| | ' /         #
+#       ___) | |___|  __/ ___ \|  _  |  | |_) / ___ \| |\  | . \         #
+#      |____/|_____|_| /_/   \_\_| |_|  |____/_/   \_\_| \_|_|\_\        #
+#                                                                        #
+#                                                                        #
+#      -----------------------------------------------------------       #
+#                  UNAUTHORIZED ACCESS IS PROHIBITED                     #
+#      -----------------------------------------------------------       #
+#                                                                        #
+#                                                                        #
+#   You must have explicit authorized permission to access this device   #
+#    All activities performed on this device are logged and monitored    #
+#                                                                        #
+#                                                                        #
+##########################################################################^C
+!
+line con 0
+line aux 0
+line vty 0 4
+ session-timeout 15 
+ transport input ssh
+line vty 5 15
+ session-timeout 15 
+ transport input ssh
+!
+scheduler allocate 20000 1000
+end

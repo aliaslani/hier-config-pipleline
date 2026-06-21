@@ -1,0 +1,215 @@
+Building configuration...
+
+Current configuration : 6070 bytes
+!
+version 15.3
+no service pad
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+!
+hostname ATM-1506090asiabsedaghat
+!
+boot-start-marker
+boot-end-marker
+!
+!
+enable secret 5 $1$Yd.n$gFkT8kVlMK1wuiCAcsJ8H.
+!
+aaa new-model
+!
+!
+aaa group server tacacs+ ISE_TACACS
+ server name ISE-3
+ server name ISE-4
+ ip tacacs source-interface Vlan1
+!
+aaa authentication login default group ISE_TACACS local
+aaa authentication enable default group ISE_TACACS enable
+aaa authorization console
+aaa authorization config-commands
+aaa authorization exec default group ISE_TACACS local 
+aaa authorization commands 1 default group ISE_TACACS local 
+aaa authorization commands 15 default group ISE_TACACS local 
+aaa authorization network default local 
+aaa accounting exec default start-stop group ISE_TACACS
+aaa accounting commands 1 default start-stop group ISE_TACACS
+aaa accounting commands 15 default start-stop group ISE_TACACS
+!
+!
+!
+!
+!
+aaa session-id common
+memory-size iomem 10
+!
+!
+!
+!
+!
+!
+
+
+!
+!
+!
+!
+no ip domain lookup
+ip domain name Sepah.local
+ip cef
+no ipv6 cef
+!
+!
+multilink bundle-name authenticated
+license udi pid CISCO888-SEC-K9 sn FCZ1628C5NX
+!
+!
+username test privilege 15 secret 5 $1$1tBw$3boulUlCHAUzWMC7mvz0s0
+username admin privilege 15 secret 5 $1$C2aD$/sgDj0.mD6Cx5GbblfmJm.
+username mashhad privilege 15 secret 5 $1$j52m$Oaw0O8qSfF7dYF9dTBkLY1
+username spbnk privilege 15 secret 5 $1$pgd/$AtEhyj.ZeJVwUg5SYPK1c.
+!
+!
+!
+!
+!
+controller DSL 0
+!
+ip ssh version 2
+! 
+!
+crypto isakmp policy 110
+ encr aes 192
+ authentication pre-share
+ group 5
+crypto isakmp key 3p@h!p$3c# address 10.191.0.2     
+crypto isakmp key 3p@h!p$3c# address 10.191.0.12    
+crypto isakmp key 3p@h!p$3c# address 10.161.65.13   
+crypto isakmp key 3p@h!p$3c# address 10.161.65.14   
+!
+!
+crypto ipsec transform-set SEP-TR-IPSEC esp-aes 192 esp-sha-hmac 
+ mode tunnel
+!
+crypto ipsec profile SEP-PR-IPSEC
+ set transform-set SEP-TR-IPSEC 
+!
+!
+!
+!
+!
+!
+interface Tunnel0
+ description 1506090-ATM-AsiyabSedaghat
+ ip address 192.168.83.22 255.255.255.252
+ ip tcp adjust-mss 1360
+ keepalive 5 4
+ tunnel source 172.24.83.22
+ tunnel destination 172.24.8.2
+!
+interface BRI0
+ no ip address
+ encapsulation hdlc
+ shutdown
+ isdn termination multidrop
+!
+interface FastEthernet0
+ no ip address
+!
+interface FastEthernet1
+ no ip address
+!
+interface FastEthernet2
+ switchport access vlan 2
+ no ip address
+!
+interface FastEthernet3
+ switchport access vlan 2
+ no ip address
+!
+interface Vlan1
+ ip address 10.108.238.1 255.255.255.252
+!
+interface Vlan2
+ ip address 172.24.83.22 255.255.255.252
+!
+router bgp 65510
+ bgp log-neighbor-changes
+!
+ip forward-protocol nd
+no ip http server
+no ip http secure-server
+!
+!
+ip route 0.0.0.0 0.0.0.0 Tunnel0
+ip route 172.24.0.0 255.255.0.0 172.24.83.21 name mpls
+!
+!
+tacacs-server timeout 1
+tacacs-server directed-request
+tacacs server ISE-3
+ address ipv4 10.100.4.90
+ key 7 091F5E2911481B4E0E15
+tacacs server ISE-4
+ address ipv4 10.180.12.12
+ key 7 03574B2B0E422D104B10
+!
+!
+!
+control-plane
+!
+!
+banner login ^C
+##########################################################################
+#                                                                        #
+#       ____  _____ ____   _    _   _    ____    _    _   _ _  __        #
+#      / ___|| ____|  _ \ / \  | | | |  | __ )  / \  | \ | | |/ /        #
+#      \___ \|  _| | |_) / _ \ | |_| |  |  _ \ / _ \ |  \| | ' /         #
+#       ___) | |___|  __/ ___ \|  _  |  | |_) / ___ \| |\  | . \         #
+#      |____/|_____|_| /_/   \_\_| |_|  |____/_/   \_\_| \_|_|\_\        #
+#                                                                        #
+#                                                                        #
+#      -----------------------------------------------------------       #
+#                  UNAUTHORIZED ACCESS IS PROHIBITED                     #
+#      -----------------------------------------------------------       #
+#                                                                        #
+#                                                                        #
+#   You must have explicit authorized permission to access this device   #
+#    All activities performed on this device are logged and monitored    #
+#                                                                        #
+#                                                                        #
+##########################################################################
+^C
+banner motd ^C 
+##########################################################################
+#                                                                        #
+#       ____  _____ ____   _    _   _    ____    _    _   _ _  __        #
+#      / ___|| ____|  _ \ / \  | | | |  | __ )  / \  | \ | | |/ /        #
+#      \___ \|  _| | |_) / _ \ | |_| |  |  _ \ / _ \ |  \| | ' /         #
+#       ___) | |___|  __/ ___ \|  _  |  | |_) / ___ \| |\  | . \         #
+#      |____/|_____|_| /_/   \_\_| |_|  |____/_/   \_\_| \_|_|\_\        #
+#                                                                        #
+#                                                                        #
+#      -----------------------------------------------------------       #
+#                  UNAUTHORIZED ACCESS IS PROHIBITED                     #
+#      -----------------------------------------------------------       #
+#                                                                        #
+#                                                                        #
+#   You must have explicit authorized permission to access this device   #
+#    All activities performed on this device are logged and monitored    #
+#                                                                        #
+#                                                                        #
+##########################################################################^C
+!
+line con 0
+ no modem enable
+line aux 0
+line vty 0 4
+ session-timeout 15 
+ transport input ssh
+line vty 5 15
+ session-timeout 15 
+ transport input ssh
+!
+!
+end
