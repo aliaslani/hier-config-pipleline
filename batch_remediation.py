@@ -110,6 +110,220 @@ def find_pairs(configs_dir: Path) -> tuple[list[ConfigPair], list[Path]]:
     return pairs, unmatched
 
 
+BLOCK_OPENER_RE = re.compile(
+    r"^("
+    r"interface\s"
+    r"|router\s"
+    r"|vrf\s+definition\s"
+    r"|ip\s+vrf\s"
+    r"|address-family\s"
+    r"|ip\s+dhcp\s+pool\s"
+    r"|ip\s+dhcp\s+class\s"
+    r"|aaa\s+group\s+server\s"
+    r"|class-map\s"
+    r"|policy-map\s"
+    r"|crypto\s+map\s"
+    r"|crypto\s+ikev2\s"
+    r"|crypto\s+ipsec\s"
+    r"|crypto\s+pki\s"
+    r"|crypto\s+keyring\s"
+    r"|route-map\s"
+    r"|ip\s+access-list\s"
+    r"|ipv6\s+access-list\s"
+    r"|mac\s+access-list\s"
+    r"|object-group\s"
+    r"|line\s+(con|vty|aux|tty)"
+    r"|key\s+chain\s"
+    r"|template\s"
+    r"|controller\s"
+    r"|zone-pair\s"
+    r"|voice\s"
+    r"|dial-peer\s"
+    r"|track\s"
+    r"|flow\s+(exporter|monitor|record)\s"
+    r")",
+    re.IGNORECASE,
+)
+
+# Platforms whose grammar the reindent/merge heuristics below are safe to run
+# against (bang-delimited, whitespace-indented "IOS style" configs).
+IOS_STYLE_PLATFORMS = {
+    Platform.CISCO_IOS,
+    Platform.CISCO_XR,
+    Platform.CISCO_NXOS,
+    Platform.ARISTA_EOS,
+    Platform.HP_COMWARE5,
+    Platform.HP_PROCURVE,
+    Platform.HUAWEI_VRP,
+}
+
+
+def _split_banner_blocks(lines: list[str]) -> list[tuple[bool, list[str]]]:
+    """Split lines into (is_banner, chunk) segments so banner bodies are
+    never touched by the reindent/merge logic below (their contents are
+    free-form text, not hierarchical config)."""
+    segments: list[tuple[bool, list[str]]] = []
+    current: list[str] = []
+    in_banner = False
+
+    for line in lines:
+        stripped = line.strip()
+        if not in_banner and re.match(r"^banner\s+\S+", stripped, re.IGNORECASE) and stripped != "banner motd ##":
+            if current:
+                segments.append((False, current))
+                current = []
+            in_banner = True
+            current.append(line)
+            continue
+        if in_banner:
+            current.append(line)
+            if stripped in ("!", "%") or stripped.startswith("^"):
+                segments.append((True, current))
+                current = []
+                in_banner = False
+            continue
+        current.append(line)
+
+    if current:
+        segments.append((True, current) if in_banner else (False, current))
+    return segments
+
+
+def reindent_flat_sections(text: str) -> str:
+    """Reconstruct one level of indentation under well-known Cisco block
+    openers (interface, router, vrf definition, ip dhcp pool, ...) when a
+    run of lines between separators ("!"/blank) is currently flat (indent 0).
+    Leaves already-indented / unrelated flat runs untouched."""
+    raw_lines = text.replace("\r\n", "\n").replace("\r", "\n").split("\n")
+
+    out: list[str] = []
+    for is_banner, chunk in _split_banner_blocks(raw_lines):
+        if is_banner:
+            out.extend(chunk)
+            continue
+
+        run: list[str] = []
+
+        def flush(run: list[str]) -> None:
+            if len(run) > 1:
+                header = run[0]
+                header_indent = len(header) - len(header.lstrip())
+                body = run[1:]
+                all_flat = all(
+                    (len(ln) - len(ln.lstrip())) == header_indent
+                    for ln in body
+                    if ln.strip()
+                )
+                if all_flat and BLOCK_OPENER_RE.match(header.strip()):
+                    out.append(header)
+                    child_indent = " " * (header_indent + 1)
+                    for ln in body:
+                        out.append(f"{child_indent}{ln.strip()}" if ln.strip() else ln)
+                    return
+            out.extend(run)
+
+        for line in chunk:
+            stripped = line.strip()
+            if not stripped or stripped == "!":
+                flush(run)
+                run = []
+                out.append(line)
+            else:
+                run.append(line)
+        flush(run)
+
+    return "\n".join(out)
+
+
+@dataclass
+class _Node:
+    text: str
+    children: list["_Node"]
+
+
+def _build_tree(text: str) -> list[_Node]:
+    """Build a nested tree from indentation, keeping "!"/comment lines as
+    opaque, never-merged leaves."""
+    lines = text.split("\n")
+
+    def indent(s: str) -> int:
+        return len(s) - len(s.lstrip())
+
+    root: list[_Node] = []
+    stack: list[tuple[int, list[_Node]]] = [(-1, root)]
+
+    for raw in lines:
+        stripped = raw.strip()
+        if not stripped:
+            continue
+        level = indent(raw)
+
+        while level <= stack[-1][0] and len(stack) > 1:
+            stack.pop()
+
+        siblings = stack[-1][1]
+        node = _Node(text=stripped, children=[])
+        siblings.append(node)
+        stack.append((level, node.children))
+
+    return root
+
+
+def _merge_siblings(nodes: list[_Node]) -> list[_Node]:
+    """Merge sibling nodes with identical text, concatenating (and
+    recursively merging) their children, preserving first-seen order."""
+    merged: dict[str, _Node] = {}
+    order: list[str] = []
+    for idx, node in enumerate(nodes):
+        # Never merge separators/comments - keep every "!" independent.
+        if node.text == "!" or node.text.startswith("!") or node.text.startswith("#"):
+            key = f"__sep_{idx}__"
+            merged[key] = node
+            order.append(key)
+            continue
+        if node.text in merged:
+            merged[node.text].children.extend(node.children)
+        else:
+            merged[node.text] = node
+            order.append(node.text)
+
+    result = []
+    for key in order:
+        node = merged[key]
+        node.children = _merge_siblings(node.children)
+        result.append(node)
+    return result
+
+
+def _serialize_tree(nodes: list[_Node], depth: int = 0) -> list[str]:
+    out: list[str] = []
+    indent = " " * depth
+    for node in nodes:
+        out.append(f"{indent}{node.text}")
+        out.extend(_serialize_tree(node.children, depth + 1))
+    return out
+
+
+def merge_duplicate_sections(text: str) -> tuple[str, bool]:
+    """Merge any duplicate sibling sections in `text` so hier_config never
+    sees a literal duplicate child. Returns (new_text, changed)."""
+    normalized = text.replace("\r\n", "\n").replace("\r", "\n")
+    tree = _build_tree(normalized)
+    merged = _merge_siblings(tree)
+    new_text = "\n".join(_serialize_tree(merged))
+    return new_text, new_text != normalized
+
+
+def normalize_config_text(text: str, platform: Platform) -> str:
+    """Run the flat-dump recovery pipeline for platforms whose grammar it
+    applies to; return the text unchanged otherwise."""
+    if platform not in IOS_STYLE_PLATFORMS:
+        return text
+    text = reindent_flat_sections(text)
+    text, _ = merge_duplicate_sections(text)
+    return text
+
+
 def find_duplicate_siblings(text: str) -> list[tuple[str, int, int]]:
 
     lines = text.splitlines()
@@ -175,6 +389,9 @@ def process_pair(pair: ConfigPair, output_root: Path, platform: Platform) -> dic
         running_text = read_text_from_file(str(pair.nonhardened))
         generated_text = read_text_from_file(str(pair.hardened))
 
+        running_text = normalize_config_text(running_text, platform)
+        generated_text = normalize_config_text(generated_text, platform)
+
         running = get_hconfig(platform, running_text)
         generated = get_hconfig(platform, generated_text)
 
@@ -203,16 +420,16 @@ def process_pair(pair: ConfigPair, output_root: Path, platform: Platform) -> dic
 
     except Exception as e:
         print(f"  Error processing pair: {e}")
-        # if isinstance(e, DuplicateChildError) or "duplicate section" in str(e).lower():
-        #     for label, src_path in (("nonhardened", pair.nonhardened), ("hardened", pair.hardened)):
-        #         try:
-        #             dupes = find_duplicate_siblings(src_path.read_text(encoding="utf-8"))
-        #         except Exception:
-        #             dupes = []
-        #         if dupes:
-        #             print(f"  Possible duplicate sibling lines in {label} file ({src_path.name}):")
-        #             for text, first_ln, dup_ln in dupes:
-        #                 print(f"    '{text}' first at line {first_ln}, repeated at line {dup_ln}")
+        if isinstance(e, DuplicateChildError) or "duplicate section" in str(e).lower():
+            for label, src_path in (("nonhardened", pair.nonhardened), ("hardened", pair.hardened)):
+                try:
+                    dupes = find_duplicate_siblings(src_path.read_text(encoding="utf-8"))
+                except Exception:
+                    dupes = []
+                if dupes:
+                    print(f"  Possible duplicate sibling lines in {label} file ({src_path.name}):")
+                    for text, first_ln, dup_ln in dupes:
+                        print(f"    '{text}' first at line {first_ln}, repeated at line {dup_ln}")
         return {"success": False, "dir": str(dest_dir), "error": str(e)}
 
 
